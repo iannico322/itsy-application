@@ -116,7 +116,7 @@ export default function App() {
 
 
       <View className="w-full h-full flex items-center  px-2  py-3 box-border">
-        <View className=" flex flex-col w-full h-[85%] overflow-hidden bg-background rounded-lg border border-border/40 box-border items-center  p-2" style={{gap:10}} >
+        <View className=" flex flex-col w-full h-[82%] overflow-hidden bg-background rounded-lg border border-border/40 box-border items-center  p-2" style={{gap:10}} >
 
 
           <View className=" relative overflow-hidden w-full flex-1 rounded-md box-border border-primary-foreground border flex " >
