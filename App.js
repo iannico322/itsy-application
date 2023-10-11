@@ -7,6 +7,7 @@ import {
   SafeAreaView,
   ScrollView,
   Alert,
+  Switch,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -16,7 +17,12 @@ import { useEffect, useRef, useState } from "react";
 import GenerateMenus from "./screens/generateMenus";
 import sampleData from "./sampleData";
 
-import UserMSG from "./components/messages/userMsg";
+// import UserMSG from "./components/messages/userMsg";
+
+// di mugana ang MUI sa akoa
+import Checkbox from '@mui/material/Checkbox';
+import FormControlLabel from '@mui/material/FormControlLabel';
+
 
 // import CheckBox from '@react-native-community/checkbox';
 
@@ -34,10 +40,38 @@ export default function App() {
 
   const [foodPref, setFoodPref] = useState(false)
 
+  const [checked, setChecked] = useState([
+    {pref : "Vegan", check: false},
+    {pref : "Vegetarian", check: false},
+    {pref : "Omnivorous", check: false},
+    {pref : "Gluten-free", check: false},
+    {pref : "Dairy-free", check: false},
+    {pref : "Nut-free", check: false},
+    {pref : "Low-carb", check: false},
+    {pref : "Low-fat", check: false},
+    {pref : "Organic", check: false},
+    {pref : "Filipino", check: false},
+    {pref : "Spanish", check: false},
+    {pref : "Italian", check: false},
+    {pref : "American", check: false},
+    {pref : "Carnivore", check: false},
+    {pref : "High-fiber", check: false},
+    {pref : "Raw food", check: false},
+  ]);
+
+  const toggleCheck = (index) => {
+    const updatedSwitches = [...checked];
+    updatedSwitches[index] = { ...updatedSwitches[index], check: !updatedSwitches[index].check };
+    setChecked(updatedSwitches);
+  };
+
   const selectPreferences = () => {
       console.log("Select Preference button clicked!")
       setFoodPref(true)
   }
+
+
+
 
   const [showNotif,setShowNotif]= useState(true)
 
@@ -473,47 +507,6 @@ export default function App() {
                   }}
                 />
               </View>
-              
-        {/* Selecting food preferences */}
-        {/* <View className={ foodPref ? " w-screen h-screen absolute justify-center items-center bg-[#00000099]" : "hidden"}>
-            <View className=" w-[80%] min-h-[50%] rounded-md p-5 bg-[#ffffff] shadow-xl ">
-
-
-                <Text className=" text-[25px] text-center text-[#1EDF38] mb-1">Dish Preferences</Text>
-
-
-                    <CheckBox label="Vegetarian" />
-                    <CheckBox label="Vegan" />
-                    <CheckBox label="Omnivorous" />
-                    <CheckBox label="Gluten-free" />
-                    <CheckBox label="Dairy-free" />
-                    <CheckBox label="Nut-free" />
-                    <CheckBox label="Low-carb" />
-                    <CheckBox label="Low-fat" />
-                    <CheckBox label="Organic" />
-                    
-
-                    <CheckBox
-                      disabled={false}
-                      value={false}
-                      onValueChange={(newValue) => setToggleCheckBox(newValue)}
-                    />
-
-
-                <View className="w-full h-[60px] flex flex-row justify-between items-center mt-5 ">
-                    <Buttons 
-                        onPress={()=>{setFoodPref(false)}}
-                        label="Cancel"
-                        addStyle= " w-[130] h-[40px] bg-[#b13030] "
-                    />
-                    <Buttons 
-                        onPress={()=>{navigation.navigate('Generated')}}
-                        label="Generate"
-                        addStyle= " w-[130] h-[40px] bg-[#1EDF38] "
-                    />
-                </View>   
-            </View>
-          </View> */}
 
 
               <View
@@ -581,6 +574,59 @@ export default function App() {
               fill="currentColor"
             />
           </Svg> */}
+
+
+
+
+
+
+
+
+        {/* Selecting food preferences */}
+        <View className={ foodPref ? " w-screen h-screen absolute justify-center items-center bg-[#00000099]" : "hidden"}>
+            <View className=" w-[80%] h-[60%] rounded-md p-5 bg-[#ffffff] shadow-xl ">
+
+
+                <Text className=" text-[25px] text-center text-foreground mb-3 font-semibold">Dish Preferences</Text>
+
+                <ScrollView className = "border-r-[1px] border-r-foreground">
+                  {checked.map((e, index) => (
+                    <View key={index} className = " flex flex-row items-center">
+                      <Switch
+                        value={e.check}
+                        onValueChange={() => toggleCheck(index)}
+                      />
+                      <Text className = " text-border text-[15px]">{e.pref}</Text>
+                    </View>
+                  ))}
+                </ScrollView>
+
+                <View className="w-full h-[60px] flex flex-row justify-between items-center mt-5 ">
+                    <TouchableOpacity
+                      className=" w-[40%]  h-10 bg-[#C93131] rounded-md flex items-center justify-center"
+                      onPress= {()=>{setFoodPref(false)}}
+                    >
+
+                      <Text className=" text-background font-semibold text-[16px]">Cancel</Text>
+
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                      className=" w-[40%]  h-10 bg-foreground rounded-md flex items-center justify-center"
+                      onPress= {()=>{setFoodPref(false)}}
+                    >
+
+                      <Text className=" text-background font-semibold text-[16px]">Confirm</Text>
+
+                    </TouchableOpacity>
+
+                </View>   
+            </View>
+          </View>
+
+
+
+
     </View>
   );
 }
