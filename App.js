@@ -19,7 +19,8 @@ import Preferences from "./screens/preferences/preferences";
 import EmtScreen from "./screens/components/messages/EmtScreen";
 import AIMSG from "./screens/components/messages/AIMsg";
 import UserMSG from "./screens/components/messages/userMsg";
-import SetUp,{getLocalStorage,setLocalStorage} from "./screens/setUp";
+import SetUp,{getLocalStorage,setLocalStorage} from "./screens/tempDB";
+import OpenAIText,{cancelRequest} from "./screens/API's/OpenAIText";
 
 // import UserMSG from "./components/messages/userMsg";
 
@@ -37,13 +38,15 @@ import SetUp,{getLocalStorage,setLocalStorage} from "./screens/setUp";
 
 export default function App() {
 
-
-  SetUp()
-
+  useEffect(  ()=>{
+     SetUp()
+  },[])
+ 
+ 
   const [menuActivate, setMenuActivate] = useState(false);
-
+   
   const [messages, setMessages] = useState([]);
-
+  const [menus,setMenus] = useState([]);
   useEffect(() => {
 
     
@@ -56,13 +59,8 @@ export default function App() {
 
   }, []);
 
-  useEffect(() => {
-
-    scrollViewRef.current?.scrollToEnd({ animated: true });
-
-    setLocalStorage("messages",JSON.stringify(messages))
-  
-  }, [messages]);
+  const scrollViewRef = useRef();
+ 
 
 
 
@@ -79,14 +77,14 @@ export default function App() {
 
 
 
-  const [showNotif,setShowNotif]= useState(true)
+  const [showNotif,setShowNotif]= useState(false)
 
   const [items, setItem] = useState({
     name: "",
     qk: "",
   });
 
-  const scrollViewRef = useRef();
+
   useEffect(() => {
     console.log(menuActivate);
   }, [menuActivate]);
@@ -176,7 +174,6 @@ export default function App() {
     console.log(messages[indexMain], "Success Delete", indexMain);
   }
   
-  // const scrollViewRef = useRef(null);
 
   // Function to scroll to the bottom of the ScrollView
   const scrollToBottom = () => {
@@ -187,25 +184,21 @@ export default function App() {
 
   useEffect(() => {
     scrollToBottom();
+    scrollViewRef.current?.scrollToEnd({ animated: true });
   }, [messages]);
 
 
 
 
 
-  const getData = async () => {
-    const data = await AsyncStorage.getItem("itsy-store");
-    return data;
-  };
 
   useEffect(() => {
     scrollViewRef.current?.scrollToEnd({ animated: true });
-    console.log(messages)
+    setLocalStorage("messages",JSON.stringify(messages))
   }, [messages]);
 
-  useEffect(() => {
-    console.log(items);
-  }, [items]);
+
+
 
   return (
     <View className=" flex-1 w-screen bg-accent-foreground " style={{ gap: 2 }}>
@@ -259,7 +252,7 @@ export default function App() {
           style={{ gap: 5 }}
         >
           <View className={showNotif?" absolute z-10 translate-y-[-10px] translate-x-2 h-5 w-5 flex items-center justify-center rounded-full  bg-red-600":"hidden"}>
-             <Text className=" text-background text-[10px]">99+</Text>
+             <Text className=" text-background text-[10px]">{menus.length }+</Text>
           </View>
           <Svg
             width="18"
@@ -292,7 +285,7 @@ export default function App() {
         >
           
           <GenerateMenus
-            menus={sampleData}
+            menus={menus}
           />
         </View>
 
@@ -308,7 +301,7 @@ export default function App() {
           
           <View className=" relative overflow-hidden w-full flex-1 rounded-md box-border border-primary-foreground border flex ">
           <SafeAreaView>
-            <ScrollView>
+            <ScrollView  ref={scrollViewRef}>
             {messages.length >= 2 ? (
                   messages.map((e, key) =>
                     e.role != "user" ? (
@@ -408,7 +401,83 @@ export default function App() {
               <TouchableOpacity
                 className="w-full h-12 flex-1 bg-primary-foreground rounded-md flex items-center justify-center"
                 onPress={() => {
-                  replyChatBeforeRES()
+         
+                  replyChatBeforeRES();
+                  let product =[]
+                  
+                  messages[messages.length - 1].products.map(
+                    (e) =>
+                      (product = [...product, `${e.itemsQK} ${e.itemsName}`])
+                  )
+
+                
+
+                  OpenAIText({ product: `${product.join(" ")}` }).then((result ) => {
+                    console.log("Menu API Response");
+                    
+
+                    // if (result ?) {
+                      // toast({
+                      //   title: "Stop Responding!",
+                      //   description:
+                      //     "Your request for cancellation of menu has been successfully implemented",
+                      // });
+                      // SetLoading(false);
+
+                    //   messages.map((e) =>
+                    //     setMessages([
+                    //       ...messages,
+                    //       {
+                    //         products: [...e.products],
+                    //         message: `Your request for cancellation of menu has been successfully implemented!`,
+                    //         direction: "outgoing",
+                    //         role: "assistant",
+                    //         image: "",
+                    //       },
+                    //     ])
+                    //   );
+                    // } 
+                    // else {
+                      // SetLoading(false);
+                      setShowNotif(true)
+                      setMenus(result);
+                      console.log(result,"REsi;tt API")
+                      // toast({
+                      //   title: "DONE... ",
+                      //   description: "Here are your menus",
+                      // });
+
+                      if (result) {
+                        let menus_name = [];
+
+                        result.map((e, key) => {
+                          menus_name = [
+                            ...menus_name,
+                            `${key + 1}. ${e.name}`,
+                          ];
+                        });
+
+                        messages.map((e) =>
+                          setMessages([
+                            ...messages,
+                            {
+                              products: [...e.products],
+                              message: `🕸️Hello, dear! Like a diligent spider 🕷️, your menus are spun. Thanks for your patience, as precious as dew on a web. Enjoy your menus!
+        
+Here are your menus:
+${menus_name.join(" \n")}`,
+                              direction: "outgoing",
+                              role: "assistant",
+                              image: "",
+                            },
+                          ])
+                        );
+                      }
+                    
+                  }).catch((error) => {
+                    // SetLoading(false);
+                    console.log(error);
+                  });
                   
                 }}
               >

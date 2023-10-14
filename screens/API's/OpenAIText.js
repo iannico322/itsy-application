@@ -2,6 +2,7 @@
 import axios from 'axios'
 
 import CryptoJS from "crypto-js"
+import { getLocalStorage } from '../tempDB';
 
 let cancelRequest; 
 
@@ -11,8 +12,12 @@ async function OpenAIText({product}) {
 
   
 
+  
+  
+
 
   const decryptText = (encryptedText)=> {
+    
     const bytes = CryptoJS.AES.decrypt(encryptedText, "itsy");
     return bytes.toString(CryptoJS.enc.Utf8);
   };
@@ -21,8 +26,10 @@ async function OpenAIText({product}) {
 
   const bodyPrompt = `Generate at least 2 dishes in JSON format based on the following products, preferences, and language.
   Products: [${product}]
-  Preferences: [${localStorage.getItem('SelectedPrefence')}]
-  Language [${localStorage.getItem('Languange')}]
+  Preferences: [${ await getLocalStorage("SelectedPrefence").then
+(e=>e)}]
+  Language [${ await getLocalStorage("Languange").then
+  (e=>e)}]
   
   Output:[{"name": "dish name","ingredients": ["ingredient1", "ingredient2", ...],"cooking_steps": ["1. step1", "2. step2", ...]}, ...]`
 
@@ -135,14 +142,15 @@ async function OpenAIText({product}) {
         
       }
 
-     try {
-    const response = axios.post("https://api.openai.com/v1/chat/completions", apiRequestBody, {
+     try  {
+    const  response =  axios.post("https://api.openai.com/v1/chat/completions", apiRequestBody, {
       cancelToken: source.token,
       headers: {
-        Authorization: `Bearer ${ decryptText(localStorage.getItem('none')||"")}`,
+        Authorization: `Bearer ${ await getLocalStorage("none").then(e=>(decryptText(e)))}`,
         "Content-Type": "application/json",
       }
     });
+  
     return JSON.parse((await response).data.choices[0].message.content);
   } catch (e) {
     return [];

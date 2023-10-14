@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { ScrollView, Switch, Text, TouchableOpacity, View } from "react-native";
 import { Path, Svg } from "react-native-svg";
+import { setLocalStorage } from "../tempDB";
 
 
 
@@ -56,7 +57,8 @@ const Preferences = ({ Close }) => {
     };
     setChecked(updatedSwitches);
     const checkedPrefs = checked.filter(item => item.prefState).map(item => item.prefName);
-    console.log(checkedPrefs);
+    
+    setLocalStorage("SelectedPrefence",JSON.stringify(checkedPrefs.join(', ')))
     
     
     
