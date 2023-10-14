@@ -24,15 +24,7 @@ async function OpenAIText({product}) {
   Preferences: [${localStorage.getItem('SelectedPrefence')}]
   Language [${localStorage.getItem('Languange')}]
   
-  Output:
-  [
-      {
-          "name": "dish name",
-          "ingredients": ["ingredient1", "ingredient2", ...],
-          "cooking_steps": ["1. step1", "2. step2", ...]
-      },
-      ...
-  ]`
+  Output:[{"name": "dish name","ingredients": ["ingredient1", "ingredient2", ...],"cooking_steps": ["1. step1", "2. step2", ...]}, ...]`
 
    const apiMessages =  { role: "user", content: bodyPrompt}
 
@@ -52,13 +44,7 @@ async function OpenAIText({product}) {
             Preferences: [Filipino Style]
             Language: [english]
             
-            Expected Output:
-            [
-              {
-                "name": "Dish Name",
-                "ingredients": ["ingredient1", "ingredient2", ...],
-                "cooking_steps": ["1. step1", "2. step2", ...]
-              },
+            Output:[{"name": "dish name","ingredients": ["ingredient1", "ingredient2", ...],"cooking_steps": ["1. step1", "2. step2", ...]}, ...]
     
         
             `
@@ -84,13 +70,7 @@ async function OpenAIText({product}) {
             Preferences: [Filipino Style]
             Language: [Bisaya]
             
-            Expected Output:
-            [
-              {
-                "name": "Dish Name",
-                "ingredients": ["ingredient1", "ingredient2", ...],
-                "cooking_steps": ["1. step1", "2. step2", ...]
-              },
+            Output:[{"name": "dish name","ingredients": ["ingredient1", "ingredient2", ...],"cooking_steps": ["1. step1", "2. step2", ...]}, ...]
     
         
             `
@@ -117,13 +97,7 @@ async function OpenAIText({product}) {
           Preferences: [Filipino Style]
           Language: [UwU]
           
-          Expected Output:
-          [
-            {
-              "name": "Dish Name",
-              "ingredients": ["ingredient1", "ingredient2", ...],
-              "cooking_steps": ["1. step1", "2. step2", ...]
-            },
+          Output:[{"name": "dish name","ingredients": ["ingredient1", "ingredient2", ...],"cooking_steps": ["1. step1", "2. step2", ...]}, ...]
   
       
           `
