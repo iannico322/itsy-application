@@ -7,67 +7,73 @@ import {
   SafeAreaView,
   ScrollView,
   Alert,
-  Switch,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { Path, Svg } from "react-native-svg";
-import Input from "./components/input/input";
+import Input from "./screens/components/input/input";
 import { useEffect, useRef, useState } from "react";
 import GenerateMenus from "./screens/generateMenus";
 import sampleData from "./sampleData";
+import Preferences from "./screens/preferences/preferences";
+import EmtScreen from "./screens/components/messages/EmtScreen";
+import AIMSG from "./screens/components/messages/AIMsg";
+import UserMSG from "./screens/components/messages/userMsg";
+import SetUp,{getLocalStorage,setLocalStorage} from "./screens/setUp";
 
 // import UserMSG from "./components/messages/userMsg";
 
 // di mugana ang MUI sa akoa
-import Checkbox from '@mui/material/Checkbox';
-import FormControlLabel from '@mui/material/FormControlLabel';
+// import Checkbox from '@mui/material/Checkbox';
+// import FormControlLabel from '@mui/material/FormControlLabel';
 
 
 // import CheckBox from '@react-native-community/checkbox';
 
+
+
+
+
+
 export default function App() {
+
+
+  SetUp()
+
   const [menuActivate, setMenuActivate] = useState(false);
 
   const [messages, setMessages] = useState([]);
 
-  const [product,setproducts]= useState([])
+  useEffect(() => {
 
-  // const [product,setproducts]= useState([
-  //   { itemsName: "Name", itemsQK: "12" },
-  //   { itemsName: "Namesada", itemsQK: "134" },
-  // ])
+    
+      getLocalStorage("messages").then(value => {
+        setMessages(JSON.parse(value))
+      });
+   
 
-  const [foodPref, setFoodPref] = useState(false)
+    
 
-  const [checked, setChecked] = useState([
-    {pref : "Vegan", check: false},
-    {pref : "Vegetarian", check: false},
-    {pref : "Omnivorous", check: false},
-    {pref : "Gluten-free", check: false},
-    {pref : "Dairy-free", check: false},
-    {pref : "Nut-free", check: false},
-    {pref : "Low-carb", check: false},
-    {pref : "Low-fat", check: false},
-    {pref : "Organic", check: false},
-    {pref : "Filipino", check: false},
-    {pref : "Spanish", check: false},
-    {pref : "Italian", check: false},
-    {pref : "American", check: false},
-    {pref : "Carnivore", check: false},
-    {pref : "High-fiber", check: false},
-    {pref : "Raw food", check: false},
-  ]);
+  }, []);
 
-  const toggleCheck = (index) => {
-    const updatedSwitches = [...checked];
-    updatedSwitches[index] = { ...updatedSwitches[index], check: !updatedSwitches[index].check };
-    setChecked(updatedSwitches);
-  };
+  useEffect(() => {
+
+    scrollViewRef.current?.scrollToEnd({ animated: true });
+
+    setLocalStorage("messages",JSON.stringify(messages))
+  
+  }, [messages]);
+
+
+
+
+  const [showFoodPref, setShowFoodPref] = useState(false)
+
+  
 
   const selectPreferences = () => {
       console.log("Select Preference button clicked!")
-      setFoodPref(true)
+      setShowFoodPref(true)
   }
 
 
@@ -85,13 +91,7 @@ export default function App() {
     console.log(menuActivate);
   }, [menuActivate]);
 
-  const storeData = async (value) => {
-    try {
-      await AsyncStorage.setItem("itsy-store", value);
-    } catch (e) {
-      // saving error
-    }
-  };
+  
 
   function addItems() {
 
@@ -110,71 +110,72 @@ export default function App() {
     }
     else{
 
-      setproducts([...product, {itemsQK: items.qk, itemsName: items.name}]) 
-      const newMessage = {
-      product: product.length ==0? `${items.qk} ${items.name}`:`${[...product,` ${items.qk} ${items.name}`]} ` ,
-      direction: 'outgoing',
-      from: "user"
-      };
-    
-      setMessages([...messages, newMessage]);
+      messages.map((e) =>
+      setMessages([
+        ...messages,
+        {
+          products: [
+            ...e.products,
+            { itemsName: `${items.name}`, itemsQK: `${items.qk}` },
+          ],
+          message: "This is my updated Item",
+          direction: "outgoing",
+          role: "user",
+          image: "",
+        },
+      ]))
 
-      console.table(messages)
-      setItem({name:"",qk:""})
       }
+      setItem({
+        name: "",
+        qk: "",
+      })
   }
 
-  // function addItems() {
-  //   if (items.name=="" || items.qk=="") {
-  //     Alert.alert(
-  //       'Oopsie My Dear!',
-  //       'Hold on, sweetie! Make sure all the little boxes are filled.',
-  //       [
-  //         {
-  //           text: 'OK',
-  //           onPress: () => console.log('OK Pressed'),
-  //         },
-  //       ],
-  //       { cancelable: false }
-  //     );
-      
-  //   }else{
-  //     setproducts({ itemsName: `${items.name}`, itemsQK: `${items.qk}` })
-  //     setItem({ name: "", qk: "1" })
-  //   }
-    
-  // }
 
 
-  // function deleteItem(indexMain, indexToDelete) {
-  //   messages[indexMain].products.splice(indexToDelete, 1);
 
-  //   setMessages([...messages, messages[indexMain]]);
 
-  //   console.log(messages[indexMain], "sheeesh yeeted!", indexMain);
-  // }
 
-  function deleteItem(indexToDelete) {
-    const updatedProduct = [...product];
-    updatedProduct.splice(indexToDelete, 1);
-    setproducts(updatedProduct);
+  function replyChatBeforeRES() {
+    messages.map((e) =>
+      setMessages([
+        ...messages,
+        {
+          products: [...e.products],
+          message: `🕸️Hello, dear! Like a diligent spider 🕷️, I’m spinning your menus. Your patience is as precious as dew on a web. I’m fetching your menus! 🌼
+
+          Please wait while I’m searching for your menus…`,
+          direction: "outgoing",
+          role: "assistant",
+          image: "",
+        },
+      ])
+    );
   }
 
-  // const onChangeInput = (key, value) => {
-  //   setItem({
-  //     ...items,
-  //     [key]: value,
-  //   });
-  // };
 
+  const Erase=()=>{
+    AsyncStorage.clear()
+    setMessages([ {
+      role: "itsy",
+      products: [],
+      message:
+        "Hey dear, I'm ITSY your culinary spider buddy! share your items, and I'll weave dishes so snappy!",
+      direction: "",
+      image: "",
+    }])
+  }
+
+
+  //Handle Delete Items
+  function deleteItem(indexMain, indexToDelete) {
+    messages[indexMain].products.splice(indexToDelete, 1);
+
+    setMessages([...messages, messages[indexMain]]);
+    console.log(messages[indexMain], "Success Delete", indexMain);
+  }
   
-  //Delete Items
-  const handleDeleteItem = (index) => {
-    // Create a new array that excludes the item at the given index
-    const updatedProduct = product.filter((_, i) => i !== index);
-    setproducts(updatedProduct);
-  };
-
   // const scrollViewRef = useRef(null);
 
   // Function to scroll to the bottom of the ScrollView
@@ -199,6 +200,7 @@ export default function App() {
 
   useEffect(() => {
     scrollViewRef.current?.scrollToEnd({ animated: true });
+    console.log(messages)
   }, [messages]);
 
   useEffect(() => {
@@ -302,182 +304,34 @@ export default function App() {
           }
           style={{ gap: 10 }}
         >
+          
+          
           <View className=" relative overflow-hidden w-full flex-1 rounded-md box-border border-primary-foreground border flex ">
+          <SafeAreaView>
+            <ScrollView>
+            {messages.length >= 2 ? (
+                  messages.map((e, key) =>
+                    e.role != "user" ? (
+                      <AIMSG e={e} key={key} />
+                    ) : (
+                      <UserMSG
+                        e={e}
+                        mkey={key}
+                        key={key}
+                        onDelete={deleteItem}
+                      />
+                    )
+                  )
+                ) : (
+                  <EmtScreen />
+                )}
+
+
+
+            </ScrollView>
             
-            {messages.length == 0
-            ?
-            <View
-              className = " flex flex-col w-[60%] self-center items-center justify-center py-[20px] mt-6 "
-            >
-              <Image 
-                  source={require('./assets/images/Itsy_logo.png')} 
-                  style={{ width: 60, height: 70 }} 
-                  resizeMode='contain'
-              />
-
-              <Text 
-                  className = " text-[18px] text-[#808080] text-center font-semibol leading-8 ">
-                  Hey dear, I'm ITSY your culinary spider buddy! Share your items, and I'll weave dishes so snappy!
-              </Text>
-
-            </View>
-
-            :
-
-            <SafeAreaView className=" flex-1 w-full h-full">
-
-
-              <ScrollView
-                className=" flex flex-col  h-[1000px] w-full "
-                ref={scrollViewRef}
-                style={{ gap: 5 }}
-              >
-
-              {/* <View className= "pr-5 pl-2 py-2 min-w-[10px] max-w-[60%] md:max-w-[90%] ml-5 text-sm text-accent-foreground/70 rounded-md bg-muted  border-[1px]">
-
-              </View> */}
-                <View className = " w-full pb-2 px-5 flex items-end mt-5 ">
-
-                <View className="  bg-foreground w-[85%] rounded-md flex flex-col justify-center items-center pt-2 pb-4 ">
-                      <Text className=" text-[#ffffff] text-[16px] font-semibold text-center">This is my updated items</Text>
-
-                      <View className=" w-[85%] bg-background rounded-md mt-2 pt-1 pb-2">  
-
-                        <View className=" flex flex-row">
-
-                          <View className = " w-[33%] justify-center items-center ">
-                            <Text className= "font-semibold text-[13px]">Name</Text>
-                          </View>
-
-                          <View className = " w-[33%] justify-center items-center ">
-                            <Text className= "font-semibold text-[13px]">Quantity</Text>
-                          </View>
-
-                          <View className = " w-[33%] justify-center items-center ">
-                            <Text className= "font-semibold text-[13px]">Action</Text>
-                          </View>
-
-                        </View>
-
-                        {product.map((z, key) => (
-                            <View className=" w-full  flex items-center flex-row bg-background rounded-md mt-1" key={key}>
-                                
-                              <View className="w-[33%]">
-                                <Text className=" text-center text-[12px] text-[#808080] font-bold">{z.itemsName}</Text> 
-                              </View>
-
-                              <View className="w-[33%]">
-                                <Text className=" text-center text-[12px] text-[#808080] font-bold">{z.itemsQK}</Text> 
-                              </View>
-
-                              <View className="w-[33%] flex justify-center items-center">
-
-                                <TouchableOpacity
-                                    onPress={()=> deleteItem(key)}
-                                >
-                                  
-                                  <Svg
-                                    width="18"
-                                    className={menuActivate?" text-primary-foreground text-sm":" text-primary text-sm"}
-                                    height="20"
-                                    viewBox="0 0 15 15"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                  >
-                                    <Path
-                                      fill-rule="evenodd"
-                                      clip-rule="evenodd"
-                                      d="M5.5 1C5.22386 1 5 1.22386 5 1.5C5 1.77614 5.22386 2 5.5 2H9.5C9.77614 2 10 1.77614 10 1.5C10 1.22386 9.77614 1 9.5 1H5.5ZM3 3.5C3 3.22386 3.22386 3 3.5 3H5H10H11.5C11.7761 3 12 3.22386 12 3.5C12 3.77614 11.7761 4 11.5 4H11V12C11 12.5523 10.5523 13 10 13H5C4.44772 13 4 12.5523 4 12V4L3.5 4C3.22386 4 3 3.77614 3 3.5ZM5 4H10V12H5V4Z"
-                                      fill="currentColor"
-                                    />
-
-                                  </Svg>
-                                </TouchableOpacity>
-                
-                              </View>        
-                                                    
-
-            
-                            </View>
-                      ))}
-
-
-                    </View>   
-                
-                  </View>
-                  
-                  {/* <View className="  bg-foreground w-[85%] rounded-md flex flex-col justify-center items-center pt-2 pb-4 ">
-                      <Text className=" text-[#ffffff] text-[16px] font-semibold text-center">This is my updated items</Text>
-
-                      <View className=" w-[85%] bg-background rounded-md mt-2 pt-1 pb-2">  
-
-                        <View className=" flex flex-row">
-
-                          <View className = " w-[33%] justify-center items-center ">
-                            <Text className= "font-semibold text-[13px]">Name</Text>
-                          </View>
-
-                          <View className = " w-[33%] justify-center items-center ">
-                            <Text className= "font-semibold text-[13px]">Quantity</Text>
-                          </View>
-
-                          <View className = " w-[33%] justify-center items-center ">
-                            <Text className= "font-semibold text-[13px]">Action</Text>
-                          </View>
-
-                        </View>
-
-                        {product.map((e, index) => (
-                            <View className=" w-full  flex items-center flex-row bg-background rounded-md mt-1" key={index}>
-                                
-                              <View className="w-[33%]">
-                                <Text className=" text-center text-[12px] text-[#808080] font-bold">{e.itemsName}</Text> 
-                              </View>
-
-                              <View className="w-[33%]">
-                                <Text className=" text-center text-[12px] text-[#808080] font-bold">{e.itemsQK}</Text> 
-                              </View>
-
-                              <View className="w-[33%] flex justify-center items-center">
-
-                                <TouchableOpacity>
-                                  <Svg
-                                    width="18"
-                                    className={menuActivate?" text-primary-foreground text-sm":" text-primary text-sm"}
-                                    height="20"
-                                    viewBox="0 0 15 15"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                  >
-                                    <Path
-                                      fill-rule="evenodd"
-                                      clip-rule="evenodd"
-                                      d="M5.5 1C5.22386 1 5 1.22386 5 1.5C5 1.77614 5.22386 2 5.5 2H9.5C9.77614 2 10 1.77614 10 1.5C10 1.22386 9.77614 1 9.5 1H5.5ZM3 3.5C3 3.22386 3.22386 3 3.5 3H5H10H11.5C11.7761 3 12 3.22386 12 3.5C12 3.77614 11.7761 4 11.5 4H11V12C11 12.5523 10.5523 13 10 13H5C4.44772 13 4 12.5523 4 12V4L3.5 4C3.22386 4 3 3.77614 3 3.5ZM5 4H10V12H5V4Z"
-                                      fill="currentColor"
-                                    />
-
-                                  </Svg>
-                                </TouchableOpacity>
-                
-                              </View>        
-                                                    
-
-                      
-                            </View>
-                      ))}
-
-
-                    </View>   
-                
-                  </View> */}
-                </View>
-
-
-
-
-              </ScrollView>
-        
-
-            </SafeAreaView> 
-            }
+          </SafeAreaView>  
+          
 
           </View>
           <View className=" flex w-full h-[160px]  box-border">
@@ -533,7 +387,7 @@ export default function App() {
             <View className=" flex w-full flex-row" style={{ gap: 5 }}>
               <TouchableOpacity
                 className="w-[50px] h-12 bg-background border border-border/40 rounded-md flex items-center justify-center"
-                onPress={() => {}}
+                onPress={Erase}
               >
                 <Svg
                   width="20"
@@ -554,7 +408,8 @@ export default function App() {
               <TouchableOpacity
                 className="w-full h-12 flex-1 bg-primary-foreground rounded-md flex items-center justify-center"
                 onPress={() => {
-                  storeData("banana");
+                  replyChatBeforeRES()
+                  
                 }}
               >
                
@@ -583,45 +438,14 @@ export default function App() {
 
 
         {/* Selecting food preferences */}
-        <View className={ foodPref ? " w-screen h-screen absolute justify-center items-center bg-[#00000099]" : "hidden"}>
-            <View className=" w-[80%] h-[60%] rounded-md p-5 bg-[#ffffff] shadow-xl ">
+        <View className={ showFoodPref ? " w-screen h-screen absolute justify-center items-center bg-[#00000099]" : "hidden"}>
+              <Preferences
+              Close={()=>{
+                setShowFoodPref(false)
+              }}
+              
 
-
-                <Text className=" text-[25px] text-center text-foreground mb-3 font-semibold">Dish Preferences</Text>
-
-                <ScrollView className = "border-r-[1px] border-r-foreground">
-                  {checked.map((e, index) => (
-                    <View key={index} className = " flex flex-row items-center">
-                      <Switch
-                        value={e.check}
-                        onValueChange={() => toggleCheck(index)}
-                      />
-                      <Text className = " text-border text-[15px]">{e.pref}</Text>
-                    </View>
-                  ))}
-                </ScrollView>
-
-                <View className="w-full h-[60px] flex flex-row justify-between items-center mt-5 ">
-                    <TouchableOpacity
-                      className=" w-[40%]  h-10 bg-[#C93131] rounded-md flex items-center justify-center"
-                      onPress= {()=>{setFoodPref(false)}}
-                    >
-
-                      <Text className=" text-background font-semibold text-[16px]">Cancel</Text>
-
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                      className=" w-[40%]  h-10 bg-foreground rounded-md flex items-center justify-center"
-                      onPress= {()=>{setFoodPref(false)}}
-                    >
-
-                      <Text className=" text-background font-semibold text-[16px]">Confirm</Text>
-
-                    </TouchableOpacity>
-
-                </View>   
-            </View>
+              />
           </View>
 
 
