@@ -2,6 +2,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect } from "react";
 
 
+
 const getLocalStorage = async (key) => {
     try {
       const value = await AsyncStorage.getItem(key);
@@ -41,6 +42,7 @@ const SetUpLocalStorage = async (key,values) => {
 const SetUp = () => {
 
 
+  useEffect(()=>{
     SetUpLocalStorage('none',"U2FsdGVkX18UQ2IN3040zHeBbni7vv1V3IxxQCKtFK8qVvVbd+1SZAApU5EQo2aptfrXD1Z4xfHRbYexqYJoIOSeBSA2gUymsQRoS6YvWcI=")
 
     SetUpLocalStorage('messages','[{ "from": "itsy", "products": [],"message":"Hey dear, I\'m ITSY your culinary spider buddy! share your items, and I\'ll weave dishes so snappy!", "direction":"","image":"" }]')
@@ -50,7 +52,8 @@ const SetUp = () => {
     SetUpLocalStorage("Languange", `English`)
 
     console.log("runnig")
-  
+  },[])
+
     
 }
 
