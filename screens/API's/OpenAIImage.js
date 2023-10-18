@@ -4,6 +4,7 @@ import axios from 'axios'
 import CryptoJS from "crypto-js"
 
 import FormData from 'form-data';
+import { getLocalStorage } from '../tempDB';
 
 
 async function OpenAIImage({image}) {
@@ -16,7 +17,7 @@ async function OpenAIImage({image}) {
 
  
 
-  console.log(image)
+  console.log(image,"sds helo")
 
       const file =image;
       const formData = new FormData();
@@ -145,7 +146,7 @@ async function OpenAIImage({image}) {
             try {
               const textresponse = await axios.post("https://api.openai.com/v1/chat/completions", apiRequestBody, {
                 headers: {
-                  Authorization: `Bearer ${ decryptText(localStorage.getItem('none')||"")}`,
+                  Authorization: `Bearer ${ await getLocalStorage("none").then(e=>(decryptText(e)))}`,
                   "Content-Type": "application/json",
                 }
               });
@@ -155,16 +156,6 @@ async function OpenAIImage({image}) {
             } catch (error) {
                return "Something went wrong";
             }
-              
-           
-           
-      
-      
-      
-    
-
-
-
         
 }
 

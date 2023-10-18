@@ -8,12 +8,16 @@ function UserMSG({ e, onDelete, mkey }) {
   return (
     <View className=" flex-1  w-[100%] min-h-[15px] flex flex-row items-center justify-end py-3">
       <View className="px-5 py-2 max-w-[80%]  mr-5 text-base text-white rounded-lg bg-[#3dd44b]">
+       
         {e.image ? (
+          
           <>
-            <Text className="text-white/80 text-sm italic md:not-italic mb-2">{e.message}</Text>
+            <Text className="text-white/80 text-sm italic md:not-italic mb-2">{e.message }</Text>
             <Image
-              className="object-contain rounded-lg w-[100%] max-h-52 sm:max-h-20"
-              source={{ uri: e.image }}
+            
+              className=" object-contain rounded-lg    w-[100%]"
+              style={{minHeight:130,objectFit:"contain"}}
+              source={{ uri:  e.image }}
             />
           </>
         ) : null}

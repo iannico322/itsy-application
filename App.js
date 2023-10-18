@@ -24,6 +24,7 @@ import UserMSG from "./screens/components/messages/userMsg";
 import SetUp,{getLocalStorage,setLocalStorage} from "./screens/tempDB";
 import OpenAIText,{cancelRequest} from "./screens/API's/OpenAIText";
 import CameraITSY from "./screens/components/camera/camera";
+import OpenAIImage from "./screens/API's/OpenAIImage";
 
 // import UserMSG from "./components/messages/userMsg";
 
@@ -222,13 +223,111 @@ export default function App() {
     useEffect(() => {
       spin()
     }, [spin]);
+
+
     const rotate = spinValue.interpolate({
       inputRange: [0, 1],
       outputRange: ['0deg', '360deg'],
     })
     
     const [showCamera,setShowCamera] = useState(false)
+    const [uploadPhoto, setUploadPhoto] = useState();
 
+
+
+    const uploadImage= (event)=> {
+
+      //this code here run after uploading image
+      // toast({
+      //   title: "Analyzing Image...",
+      //   description:
+      //     "wait up negga im analyzing your image...!",
+      // });
+      messages.map((e) =>
+        setMessages([
+          ...messages,
+          {
+            products: [...e.products],
+            message: `Could you please identify the food items in this image?`,
+            direction: "outgoing",
+            role: "user",
+            image: event,
+          },
+          {
+            products: [...e.products],
+            message: `🕸️Hello, dear! Im about to scan your image, please wait for a while`,
+            direction: "outgoing",
+            role: "assistant",
+            image: "",
+          },
+        ])
+      );
+  
+      //this code here use the image recognization component then executes codes just like axios process
+       OpenAIImage({ image: event }).then((result)=>{
+          let items = []
+          let name=""
+          let qk=""
+  
+          if (result == "No Food found!") {
+          //   toast({
+          //   title: "Done analyzing!",
+          //   description:
+          //     "No Food found!",
+          // })
+          console.log("No Food found!")
+          }else{
+           
+            JSON.parse(result)[0].food_indentified.map((e)=>(
+              name= e.name,
+              qk =e.quantity,
+              items = [...items,`${qk} ${e.name} `]
+              
+            ))
+          
+            
+            // toast({
+            //   title: "Done analyzing!",
+            //   description:
+            //     "I’ve taken a peek at your image and found the following adorable yummy dummy item(s)",
+            // })
+          }
+        
+          messages.map((e) =>
+          setMessages([
+            ...messages,
+            {
+              products: [...e.products],
+              message: `Identify food items on this image`,
+              direction: "outgoing",
+              role: "user",
+              image: event,
+            },
+            {
+              products: [...e.products],
+              message: result == "No Food found!"? `🕸️Hello, dear! I’m sorry, but I couldn’t find any food in the image you provided.` : `🕸️Hello, dear! I’ve taken a peek at your image and found the following adorable yummy dummy item(s):\n\n ${items.join('\n')}` ,
+              direction: "outgoing",
+              role: "assistant",
+              image: "",
+            },
+            {
+              products: [
+                ...e.products,
+                { itemsName: `${name}`, itemsQK: `${qk}` },
+              ],
+              message: "This is my updated Item",
+              direction: "outgoing",
+              role: "user",
+              image: "",
+            },
+          ])
+        )
+          
+          
+        })
+    }
+
+    
 
   return (
     <View className=" flex-1 h-full w-full relative">
@@ -236,7 +335,21 @@ export default function App() {
 
       <CameraITSY isCameraOn={showCamera} offCamera={()=>{
         setShowCamera(false)
-      }}/>
+      }}
+
+      onTakePhoto={ async(newPhoto) =>  {
+        console.log(newPhoto,"new")
+          setUploadPhoto(newPhoto);
+
+      
+         uploadImage(newPhoto)
+        setShowCamera(false)
+
+        
+      }}
+
+      
+      />
     </View>
     
     <View className={showCamera?"hidden":" relative flex-1 w-screen bg-accent-foreground z-0 "} style={{ gap: 2 }}>
@@ -344,11 +457,11 @@ export default function App() {
         <View className="  absolute z-10  h-full w-full p-2 "  pointerEvents="box-none"  >
         <View className=" overflow-hidden w-full h-full  flex-1 rounded-md  flex z-50"  pointerEvents="box-none"     >
             
-            <View className=" absolute  bottom-0 right-0 mb-5 mr-2  w-24 h-12 border border-border/30 bg-background/60 rounded-md flex items-center flex-row  justify-center z-40" pointerEvents="auto">
+            <View className=" absolute  bottom-0 right-0 mb-5 mr-2 w-14 h-12  bg-background/60 rounded-md flex items-center flex-row  justify-center z-40" pointerEvents="auto">
 
             
             <TouchableOpacity
-                  className="  w-24 h-12 border border-border/30 bg-background/60 rounded-md flex items-center flex-row  justify-center z-40 "
+                  className="  w-14 h-12 border border-border/30 bg-background/60 rounded-md flex items-center flex-row  justify-center z-40 "
                   onPress={()=>{
                     setShowCamera(true)
                   }}
@@ -356,7 +469,7 @@ export default function App() {
                 >
                   <Svg
                   width="20"
-                  className=" text-primary mr-2 "
+                  className=" text-primary  "
                   height="20"
                   viewBox="0 0 15 15"
                   xmlns="http://www.w3.org/2000/svg"
@@ -364,12 +477,13 @@ export default function App() {
                   <Path
                     fill-rule="evenodd"
                     clip-rule="evenodd"
-                    d="M7.81825 1.18188C7.64251 1.00615 7.35759 1.00615 7.18185 1.18188L4.18185 4.18188C4.00611 4.35762 4.00611 4.64254 4.18185 4.81828C4.35759 4.99401 4.64251 4.99401 4.81825 4.81828L7.05005 2.58648V9.49996C7.05005 9.74849 7.25152 9.94996 7.50005 9.94996C7.74858 9.94996 7.95005 9.74849 7.95005 9.49996V2.58648L10.1819 4.81828C10.3576 4.99401 10.6425 4.99401 10.8182 4.81828C10.994 4.64254 10.994 4.35762 10.8182 4.18188L7.81825 1.18188ZM2.5 9.99997C2.77614 9.99997 3 10.2238 3 10.5V12C3 12.5538 3.44565 13 3.99635 13H11.0012C11.5529 13 12 12.5528 12 12V10.5C12 10.2238 12.2239 9.99997 12.5 9.99997C12.7761 9.99997 13 10.2238 13 10.5V12C13 13.104 12.1062 14 11.0012 14H3.99635C2.89019 14 2 13.103 2 12V10.5C2 10.2238 2.22386 9.99997 2.5 9.99997Z"
-                    fill="currentColor"
+                    d="M5.5 2L4.87935 2C4.47687 1.99999 4.14469 1.99999 3.87409 2.0221C3.59304 2.04506 3.33469 2.09434 3.09202 2.21799C2.7157 2.40973 2.40973 2.7157 2.21799 3.09202C2.09434 3.33469 2.04506 3.59304 2.0221 3.87409C1.99999 4.14468 1.99999 4.47686 2 4.87933V4.87935V5.5C2 5.77614 2.22386 6 2.5 6C2.77614 6 3 5.77614 3 5.5V4.9C3 4.47171 3.00039 4.18056 3.01878 3.95552C3.03669 3.73631 3.06915 3.62421 3.10899 3.54601C3.20487 3.35785 3.35785 3.20487 3.54601 3.10899C3.62421 3.06915 3.73631 3.03669 3.95552 3.01878C4.18056 3.00039 4.47171 3 4.9 3H5.5C5.77614 3 6 2.77614 6 2.5C6 2.22386 5.77614 2 5.5 2ZM13 9.5C13 9.22386 12.7761 9 12.5 9C12.2239 9 12 9.22386 12 9.5V10.1C12 10.5283 11.9996 10.8194 11.9812 11.0445C11.9633 11.2637 11.9309 11.3758 11.891 11.454C11.7951 11.6422 11.6422 11.7951 11.454 11.891C11.3758 11.9309 11.2637 11.9633 11.0445 11.9812C10.8194 11.9996 10.5283 12 10.1 12H9.5C9.22386 12 9 12.2239 9 12.5C9 12.7761 9.22386 13 9.5 13H10.1206C10.5231 13 10.8553 13 11.1259 12.9779C11.407 12.9549 11.6653 12.9057 11.908 12.782C12.2843 12.5903 12.5903 12.2843 12.782 11.908C12.9057 11.6653 12.9549 11.407 12.9779 11.1259C13 10.8553 13 10.5232 13 10.1207V10.1207V10.1207V10.1206V9.5ZM2.5 9C2.77614 9 3 9.22386 3 9.5V10.1C3 10.5283 3.00039 10.8194 3.01878 11.0445C3.03669 11.2637 3.06915 11.3758 3.10899 11.454C3.20487 11.6422 3.35785 11.7951 3.54601 11.891C3.62421 11.9309 3.73631 11.9633 3.95552 11.9812C4.18056 11.9996 4.47171 12 4.9 12H5.5C5.77614 12 6 12.2239 6 12.5C6 12.7761 5.77614 13 5.5 13H4.87935C4.47687 13 4.14469 13 3.87409 12.9779C3.59304 12.9549 3.33469 12.9057 3.09202 12.782C2.7157 12.5903 2.40973 12.2843 2.21799 11.908C2.09434 11.6653 2.04506 11.407 2.0221 11.1259C1.99999 10.8553 1.99999 10.5231 2 10.1207V10.1206V10.1V9.5C2 9.22386 2.22386 9 2.5 9ZM10.1 3C10.5283 3 10.8194 3.00039 11.0445 3.01878C11.2637 3.03669 11.3758 3.06915 11.454 3.10899C11.6422 3.20487 11.7951 3.35785 11.891 3.54601C11.9309 3.62421 11.9633 3.73631 11.9812 3.95552C11.9996 4.18056 12 4.47171 12 4.9V5.5C12 5.77614 12.2239 6 12.5 6C12.7761 6 13 5.77614 13 5.5V4.87935V4.87934C13 4.47686 13 4.14468 12.9779 3.87409C12.9549 3.59304 12.9057 3.33469 12.782 3.09202C12.5903 2.7157 12.2843 2.40973 11.908 2.21799C11.6653 2.09434 11.407 2.04506 11.1259 2.0221C10.8553 1.99999 10.5231 1.99999 10.1206 2L10.1 2H9.5C9.22386 2 9 2.22386 9 2.5C9 2.77614 9.22386 3 9.5 3H10.1Z" fill="currentColor" 
+                
                   />
                 </Svg>
+         
+           
 
-                  <Text className=" text-primary">Upload</Text>
                 </TouchableOpacity>
                 </View>
 
@@ -389,11 +503,14 @@ export default function App() {
           
           
           
-          <View className=" relative overflow-hidden w-full flex-1 rounded-md box-border border-primary-foreground border flex ">
+          <View className=" relative overflow-hidden min-w-full flex-1 rounded-md box-border border-primary-foreground border flex ">
           <SafeAreaView>
             <ScrollView  ref={scrollViewRef}>
             {messages.length >= 2 ? (
+
                   messages.map((e, key) =>
+                  
+                  
                     e.role != "user" ? (
                       <AIMSG e={e} key={key} />
                     ) : (
@@ -467,19 +584,29 @@ export default function App() {
               </View>
             </View>
 
-            {/* Stop responding */}
-            <View className=" z-10 w-full h-[2px] relative justify-center items-center">
+           
+
+
+
+
+
+            {/* Erase the data on local storage */}
+            <View className=" flex w-full flex-col" >
+
+
+               {/* Stop responding */}
+            <View className="  absolute  z-20  w-full h-[50px] translate-y-[-35px] justify-center items-center">
 
 
               <TouchableOpacity 
                 disabled = {loading ? false : true}
-                className = { loading ? "w-[190px] h-[45px] bg-background flex flex-row justify-center items-center rounded-md" : "hidden"}
+                className = { loading ? "w-[190px] h-[45px] bg-background flex flex-row self-center justify-center items-center rounded-md" : "hidden"}
                 onPress={()=>{
                   SetLoading(false)
                   cancelRequest()
                 }}
               >
-              <Animated.View style={{transform: [{rotate}]}}>
+               <Animated.View style={{transform: [{rotate}]}}>
                 <Svg
                     width="17"
                     className= "text-border text-sm animate-spin"
@@ -500,14 +627,9 @@ export default function App() {
                 <Text className=" text-border text-[15px] ml-4">Stop Responding</Text>
               </TouchableOpacity>
 
-            </View>
+            </View>    
 
-
-
-
-
-            {/* Erase the data on local storage */}
-            <View className=" flex w-full flex-row" style={{ gap: 5 }}>
+            <View className=" flex w-full flex-row " style={{ gap: 5 }}>
               <TouchableOpacity
                 className="w-[50px] h-12 bg-background border border-border/40 rounded-md flex items-center justify-center"
                 onPress={()=>{
@@ -554,7 +676,7 @@ export default function App() {
                 onPress={() => {
                   
                   SetLoading(true)
-                  console.log("loading", loading)
+                  
 
                   replyChatBeforeRES();
                   let product =[]
@@ -566,12 +688,14 @@ export default function App() {
 
                 
                   
-                  OpenAIText({ product: `${product.join(" ")}` }).then((result ) => {
+                  OpenAIText({ product: `${product.join(" ")}` }).then( async(result ) => {
                     console.log("Menu API Response");
+                     
                     
                       // Alerts
-                      if (result.length == 0) {
-                        SetLoading(false);
+                       if (result.length == 0) {
+                        
+                        SetLoading(false)
                         Alert.alert(
                           'Stop Responding!',
                           'Your request for cancellation of generating the menu has been successfully implemented',
@@ -584,24 +708,31 @@ export default function App() {
                           { cancelable: false }
                         );
                         }else{
-                          SetLoading(false);
+                          SetLoading(false)
+                          setMenus(result)
+                          
+                                  setShowNotif(true)
                           Alert.alert(
                             'Spider Buddy 🕷️',
                             "Hey there, buddy! Your menus are all set to roll. Time for some delicious 🕷️🍔!",
                             [
                               {
                                 text: 'Got it!',
-                                onPress : () => SetLoading(false),
+                                onPress : () => {
+                                  console.log("working")
+                                },
                               },
                             ],
                             { cancelable: false }
                           );
+                        
                         }
 
-                      // SetLoading(false);
-                      setShowNotif(true)
-                      setMenus(result);
-                      console.log(result,"REST API")
+                      
+                      
+                      
+                      
+                      
                       // toast({
                       //   title: "DONE... ",
                       //   description: "Here are your menus",
@@ -610,7 +741,7 @@ export default function App() {
                       
 
 
-                      if (result) {
+                     
               
                         console.log("Inside the result")
 
@@ -639,7 +770,7 @@ ${menus_name.join(" \n")}`,
                           ])
                         ); 
 
-                      }
+                      
                     
                   }).catch((error) => {
                     // SetLoading(false);
@@ -653,6 +784,7 @@ ${menus_name.join(" \n")}`,
 
                 <Text className= " text-background " >Generate Menu</Text>
               </TouchableOpacity>
+              </View>
             </View>
           </View>
         </View>
