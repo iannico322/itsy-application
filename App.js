@@ -23,6 +23,7 @@ import AIMSG from "./screens/components/messages/AIMsg";
 import UserMSG from "./screens/components/messages/userMsg";
 import SetUp,{getLocalStorage,setLocalStorage} from "./screens/tempDB";
 import OpenAIText,{cancelRequest} from "./screens/API's/OpenAIText";
+import CameraITSY from "./screens/components/camera/camera";
 
 // import UserMSG from "./components/messages/userMsg";
 
@@ -32,10 +33,6 @@ import OpenAIText,{cancelRequest} from "./screens/API's/OpenAIText";
 
 
 // import CheckBox from '@react-native-community/checkbox';
-
-
-
-
 
 
 export default function App() {
@@ -50,17 +47,22 @@ export default function App() {
    
   const [messages, setMessages] = useState([]);
   const [menus,setMenus] = useState([]);
+
+
+
   useEffect(() => {
 
     
       getLocalStorage("messages").then(value => {
         setMessages(JSON.parse(value))
       });
-   
 
-    
+      getLocalStorage("menus").then(value => {
+        setMenus(JSON.parse(value))
+      });
 
   }, []);
+
 
   const scrollViewRef = useRef();
  
@@ -69,28 +71,6 @@ export default function App() {
 
   const [showFoodPref, setShowFoodPref] = useState(false)
  
-
-  //Spinning Loading for stop responding
-  const spinValue = new Animated.Value(0);
-  const spin =()=>{
-    spinValue.setValue(0);
-    Animated.loop(
-      Animated.timing(spinValue, {
-      toValue: 1,
-      duration: 2000,
-      easing: Easing.linear,
-      useNativeDriver: true,
-    }).start(()=>spin())
-    )
-  }
-  useEffect(() => {
-    spin()
-  }, [spin]);
-  const rotate = spinValue.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['0deg', '360deg'],
-  })
-  
 
   const selectPreferences = () => {
       console.log("Select Preference button clicked!")
@@ -205,20 +185,19 @@ export default function App() {
     }
   };
 
+
+
   useEffect(() => {
     scrollToBottom();
     scrollViewRef.current?.scrollToEnd({ animated: true });
-  }, [messages]);
-
-
-
-
-
-
-  useEffect(() => {
-    scrollViewRef.current?.scrollToEnd({ animated: true });
     setLocalStorage("messages",JSON.stringify(messages))
   }, [messages]);
+
+  
+  useEffect(() => {
+    
+    setLocalStorage("menus",JSON.stringify(menus))
+  }, [menus]);
 
 
   // useEffect(() =>{
@@ -227,10 +206,46 @@ export default function App() {
   // },[])
 
 
+    //Spinning Loading for stop responding
+    const spinValue = new Animated.Value(0);
+    const spin =()=>{
+      spinValue.setValue(0);
+      Animated.loop(
+        Animated.timing(spinValue, {
+        toValue: 1,
+        duration: 2000,
+        easing: Easing.linear,
+        useNativeDriver: true,
+      }).start(()=>spin())
+      )
+    }
+    useEffect(() => {
+      spin()
+    }, [spin]);
+    const rotate = spinValue.interpolate({
+      inputRange: [0, 1],
+      outputRange: ['0deg', '360deg'],
+    })
+    
+    const [showCamera,setShowCamera] = useState(false)
 
 
   return (
-    <View className=" flex-1 w-screen bg-accent-foreground " style={{ gap: 2 }}>
+    <View className=" flex-1 h-full w-full relative">
+    <View className={showCamera?" z-50 flex-1 h-full w-full absolute":" hidden"}>
+
+      <CameraITSY isCameraOn={showCamera} offCamera={()=>{
+        setShowCamera(false)
+      }}/>
+    </View>
+    
+    <View className={showCamera?"hidden":" relative flex-1 w-screen bg-accent-foreground z-0 "} style={{ gap: 2 }}>
+
+
+
+
+
+
       <StatusBar barStyle="dark-content" />
       <View className=" flex justify-center w-full h-20  ">
         <Image
@@ -318,14 +333,60 @@ export default function App() {
           />
         </View>
 
-        <View
-          className={
+
+        <View className={
             menuActivate
               ? " hidden"
-              : " flex flex-col w-full h-[82%] overflow-hidden bg-background rounded-lg border border-border/40 box-border items-center  p-2"
-          }
+              : " relative flex flex-col w-full h-[82%] overflow-hidden bg-background rounded-lg border border-border/40 box-border items-center   "
+          }>
+
+       
+        <View className="  absolute z-10  h-full w-full p-2 "  pointerEvents="box-none"  >
+        <View className=" overflow-hidden w-full h-full  flex-1 rounded-md  flex z-50"  pointerEvents="box-none"     >
+            
+            <View className=" absolute  bottom-0 right-0 mb-5 mr-2  w-24 h-12 border border-border/30 bg-background/60 rounded-md flex items-center flex-row  justify-center z-40" pointerEvents="auto">
+
+            
+            <TouchableOpacity
+                  className="  w-24 h-12 border border-border/30 bg-background/60 rounded-md flex items-center flex-row  justify-center z-40 "
+                  onPress={()=>{
+                    setShowCamera(true)
+                  }}
+                 
+                >
+                  <Svg
+                  width="20"
+                  className=" text-primary mr-2 "
+                  height="20"
+                  viewBox="0 0 15 15"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <Path
+                    fill-rule="evenodd"
+                    clip-rule="evenodd"
+                    d="M7.81825 1.18188C7.64251 1.00615 7.35759 1.00615 7.18185 1.18188L4.18185 4.18188C4.00611 4.35762 4.00611 4.64254 4.18185 4.81828C4.35759 4.99401 4.64251 4.99401 4.81825 4.81828L7.05005 2.58648V9.49996C7.05005 9.74849 7.25152 9.94996 7.50005 9.94996C7.74858 9.94996 7.95005 9.74849 7.95005 9.49996V2.58648L10.1819 4.81828C10.3576 4.99401 10.6425 4.99401 10.8182 4.81828C10.994 4.64254 10.994 4.35762 10.8182 4.18188L7.81825 1.18188ZM2.5 9.99997C2.77614 9.99997 3 10.2238 3 10.5V12C3 12.5538 3.44565 13 3.99635 13H11.0012C11.5529 13 12 12.5528 12 12V10.5C12 10.2238 12.2239 9.99997 12.5 9.99997C12.7761 9.99997 13 10.2238 13 10.5V12C13 13.104 12.1062 14 11.0012 14H3.99635C2.89019 14 2 13.103 2 12V10.5C2 10.2238 2.22386 9.99997 2.5 9.99997Z"
+                    fill="currentColor"
+                  />
+                </Svg>
+
+                  <Text className=" text-primary">Upload</Text>
+                </TouchableOpacity>
+                </View>
+
+          </View>
+          <View className=" flex w-full h-[160px]  box-border">
+
+          </View>
+
+            
+          </View>  
+        <View
+          className=" relative p-2 "
+          
           style={{ gap: 10 }}
         >
+
+          
           
           
           <View className=" relative overflow-hidden w-full flex-1 rounded-md box-border border-primary-foreground border flex ">
@@ -405,11 +466,6 @@ export default function App() {
                 </TouchableOpacity>
               </View>
             </View>
-            
-
-
-
-
 
             {/* Stop responding */}
             <View className=" z-10 w-full h-[2px] relative justify-center items-center">
@@ -421,21 +477,8 @@ export default function App() {
                 onPress={()=>{
                   SetLoading(false)
                   cancelRequest()
-                  // Alert.alert(
-                  //   'Stop Responding!',
-                  //   'Your request for cancellation of generating the menu has been successfully implemented',
-                  //   [
-                  //     {
-                  //       text: 'OK',
-                  //       onPress: () => console.log('OK Pressed'),
-                  //     },
-                  //   ],
-                  //   { cancelable: false }
-                  // );
                 }}
               >
-
-  
               <Animated.View style={{transform: [{rotate}]}}>
                 <Svg
                     width="17"
@@ -469,11 +512,11 @@ export default function App() {
                 className="w-[50px] h-12 bg-background border border-border/40 rounded-md flex items-center justify-center"
                 onPress={()=>{
                   Alert.alert(
-                    'Friendly reminder from your Spider Buddy 🕷️',
-                    "Hey there, buddy! I'm about to do a little cleanup. Mind if I erase your items?",
+                    'Erase',
+                    "Sure to erase? No magic can bring it back!",
                     [
                       {
-                        text: "Hold on, let's talk about it!",
+                        text: "Hold on, I want to cancel",
                         style: 'cancel',
                       },
                       {
@@ -594,23 +637,9 @@ ${menus_name.join(" \n")}`,
                               image: "",
                             },
                           ])
-                        );
-
-                        // Alert.alert(
-                        //   'Spider Buddy 🕷️',
-                        //   "Hey there, buddy! Your menus are all set to roll. Time for some delicious 🕷️🍔!",
-                        //   [
-                        //     {
-                        //       text: 'Got it!',
-                        //     },
-                        //   ],
-                        //   { cancelable: false }
-                        // );
-
-                        
+                        ); 
 
                       }
-                    // }
                     
                   }).catch((error) => {
                     // SetLoading(false);
@@ -627,21 +656,10 @@ ${menus_name.join(" \n")}`,
             </View>
           </View>
         </View>
+
+        </View>      
+
       </View>
-
-      {/* <Svg width="20" className=" text-primary-foreground" height="20"  viewBox="0 0 15 15" xmlns="http://www.w3.org/2000/svg">
-            <Path
-              fill-rule="evenodd"
-              clip-rule="evenodd"
-              d="M12.5 3L2.5 3.00002C1.67157 3.00002 1 3.6716 1 4.50002V9.50003C1 10.3285 1.67157 11 2.5 11H7.50003C7.63264 11 7.75982 11.0527 7.85358 11.1465L10 13.2929V11.5C10 11.2239 10.2239 11 10.5 11H12.5C13.3284 11 14 10.3285 14 9.50003V4.5C14 3.67157 13.3284 3 12.5 3ZM2.49999 2.00002L12.5 2C13.8807 2 15 3.11929 15 4.5V9.50003C15 10.8807 13.8807 12 12.5 12H11V14.5C11 14.7022 10.8782 14.8845 10.6913 14.9619C10.5045 15.0393 10.2894 14.9965 10.1464 14.8536L7.29292 12H2.5C1.11929 12 0 10.8807 0 9.50003V4.50002C0 3.11931 1.11928 2.00003 2.49999 2.00002Z"
-              fill="currentColor"
-            />
-          </Svg> */}
-
-
-
-
-
 
 
 
@@ -651,14 +669,13 @@ ${menus_name.join(" \n")}`,
               Close={()=>{
                 setShowFoodPref(false)
               }}
-              
-
               />
           </View>
 
 
 
 
+    </View>
     </View>
   );
 }
