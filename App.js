@@ -66,6 +66,7 @@ export default function App() {
  
   const [loading,SetLoading]= useState(false)  
 
+
   const [showFoodPref, setShowFoodPref] = useState(false)
  
 
@@ -415,21 +416,22 @@ export default function App() {
 
 
               <TouchableOpacity 
+                disabled = {loading ? false : true}
                 className = { loading ? "w-[190px] h-[45px] bg-background flex flex-row justify-center items-center rounded-md" : "hidden"}
                 onPress={()=>{
                   SetLoading(false)
                   cancelRequest()
-                  Alert.alert(
-                    'Stop Responding!',
-                    'Your request for cancellation of generating the menu has been successfully implemented',
-                    [
-                      {
-                        text: 'OK',
-                        onPress: () => console.log('OK Pressed'),
-                      },
-                    ],
-                    { cancelable: false }
-                  );
+                  // Alert.alert(
+                  //   'Stop Responding!',
+                  //   'Your request for cancellation of generating the menu has been successfully implemented',
+                  //   [
+                  //     {
+                  //       text: 'OK',
+                  //       onPress: () => console.log('OK Pressed'),
+                  //     },
+                  //   ],
+                  //   { cancelable: false }
+                  // );
                 }}
               >
 
@@ -461,11 +463,30 @@ export default function App() {
 
 
 
-
+            {/* Erase the data on local storage */}
             <View className=" flex w-full flex-row" style={{ gap: 5 }}>
               <TouchableOpacity
                 className="w-[50px] h-12 bg-background border border-border/40 rounded-md flex items-center justify-center"
-                onPress={Erase}
+                onPress={()=>{
+                  Alert.alert(
+                    'Friendly reminder from your Spider Buddy 🕷️',
+                    "Hey there, buddy! I'm about to do a little cleanup. Mind if I erase your items?",
+                    [
+                      {
+                        text: "Hold on, let's talk about it!",
+                        style: 'cancel',
+                      },
+                      {
+                        text: 'Sure, go for it!',
+                        style: 'default',
+                        onPress: ()=>{
+                          Erase()
+                        },
+                      },
+                    ],
+                    { cancelable: false }
+                  );
+                }}
               >
                 <Svg
                   width="20"
@@ -490,6 +511,7 @@ export default function App() {
                 onPress={() => {
                   
                   SetLoading(true)
+                  console.log("loading", loading)
 
                   replyChatBeforeRES();
                   let product =[]
@@ -500,45 +522,40 @@ export default function App() {
                   )
 
                 
-
+                  
                   OpenAIText({ product: `${product.join(" ")}` }).then((result ) => {
                     console.log("Menu API Response");
                     
+                      // Alerts
+                      if (result.length == 0) {
+                        SetLoading(false);
+                        Alert.alert(
+                          'Stop Responding!',
+                          'Your request for cancellation of generating the menu has been successfully implemented',
+                          [
+                            {
+                              text: 'OK',
+                              onPress: () => SetLoading(false),
+                            },
+                          ],
+                          { cancelable: false }
+                        );
+                        }else{
+                          SetLoading(false);
+                          Alert.alert(
+                            'Spider Buddy 🕷️',
+                            "Hey there, buddy! Your menus are all set to roll. Time for some delicious 🕷️🍔!",
+                            [
+                              {
+                                text: 'Got it!',
+                                onPress : () => SetLoading(false),
+                              },
+                            ],
+                            { cancelable: false }
+                          );
+                        }
 
-                    // if (result) {
-                      // Alert.alert(
-                      //   'Stop Responding!',
-                      //   'Your request for cancellation of generating the menu has been successfully implemented',
-                      //   [
-                      //     {
-                      //       text: 'OK',
-                      //       onPress: () => console.log('OK Pressed'),
-                      //     },
-                      //   ],
-                      //   { cancelable: false }
-                      // );
-                      // toast({
-                      //   title: "Stop Responding!",
-                      //   description:
-                      //     "Your request for cancellation of menu has been successfully implemented",
-                      // });
                       // SetLoading(false);
-
-                    //   messages.map((e) =>
-                    //     setMessages([
-                    //       ...messages,
-                    //       {
-                    //         products: [...e.products],
-                    //         message: `Your request for cancellation of menu has been successfully implemented!`,
-                    //         direction: "outgoing",
-                    //         role: "assistant",
-                    //         image: "",
-                    //       },
-                    //     ])
-                    //   );
-                    // } 
-                    // else {
-                      SetLoading(false);
                       setShowNotif(true)
                       setMenus(result);
                       console.log(result,"REST API")
@@ -548,12 +565,11 @@ export default function App() {
                       // });
 
                       
-                      
 
 
-                      if (result && loading == true) {
-                        // SetLoading(false);
-                        console.log("Inside the result", "isLoading: ", loading)
+                      if (result) {
+              
+                        console.log("Inside the result")
 
                         let menus_name = [];
 
@@ -580,17 +596,18 @@ ${menus_name.join(" \n")}`,
                           ])
                         );
 
-                        Alert.alert(
-                          'DONE...',
-                          "Hey there, buddy! I've got your menus ready to roll, pal! 🕷️🍔",
-                          [
-                            {
-                              text: 'OK',
-                              onPress: () => console.log('OK Pressed'),
-                            },
-                          ],
-                          { cancelable: false }
-                        );
+                        // Alert.alert(
+                        //   'Spider Buddy 🕷️',
+                        //   "Hey there, buddy! Your menus are all set to roll. Time for some delicious 🕷️🍔!",
+                        //   [
+                        //     {
+                        //       text: 'Got it!',
+                        //     },
+                        //   ],
+                        //   { cancelable: false }
+                        // );
+
+                        
 
                       }
                     // }
