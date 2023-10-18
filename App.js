@@ -38,9 +38,9 @@ import OpenAIText,{cancelRequest} from "./screens/API's/OpenAIText";
 
 export default function App() {
 
-  useEffect(  ()=>{
-     SetUp()
-  },[])
+
+  SetUp()
+
  
  
   const [menuActivate, setMenuActivate] = useState(false);
