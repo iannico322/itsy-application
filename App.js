@@ -7,6 +7,8 @@ import {
   SafeAreaView,
   ScrollView,
   Alert,
+  Animated,
+  Easing,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -38,11 +40,12 @@ import OpenAIText,{cancelRequest} from "./screens/API's/OpenAIText";
 
 export default function App() {
 
-
+  // useEffect(  ()=>{
+  //    SetUp()
+  // },[])
+ 
   SetUp()
 
- 
- 
   const [menuActivate, setMenuActivate] = useState(false);
    
   const [messages, setMessages] = useState([]);
@@ -61,12 +64,32 @@ export default function App() {
 
   const scrollViewRef = useRef();
  
-
-
+  const [loading,SetLoading]= useState(false)  
 
 
   const [showFoodPref, setShowFoodPref] = useState(false)
+ 
 
+  //Spinning Loading for stop responding
+  const spinValue = new Animated.Value(0);
+  const spin =()=>{
+    spinValue.setValue(0);
+    Animated.loop(
+      Animated.timing(spinValue, {
+      toValue: 1,
+      duration: 2000,
+      easing: Easing.linear,
+      useNativeDriver: true,
+    }).start(()=>spin())
+    )
+  }
+  useEffect(() => {
+    spin()
+  }, [spin]);
+  const rotate = spinValue.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '360deg'],
+  })
   
 
   const selectPreferences = () => {
@@ -86,7 +109,7 @@ export default function App() {
 
 
   useEffect(() => {
-    console.log(menuActivate);
+    console.log("Menu activated?", menuActivate);
   }, [menuActivate]);
 
   
@@ -198,6 +221,12 @@ export default function App() {
   }, [messages]);
 
 
+  // useEffect(() =>{
+  //   console.log("Items", items)
+  //   console.log("Messages", messages)
+  // },[])
+
+
 
 
   return (
@@ -279,7 +308,7 @@ export default function App() {
         <View
           className={
             menuActivate
-              ? "  absolute z-1 flex flex-col w-full h-[85%] overflow-hidden  rounded-lg border border-border/40 box-border items-center  p-2 "
+              ? "  absolute z-1 flex flex-col w-full h-[82%] overflow-hidden  rounded-lg border border-border/40 box-border items-center  p-2 "
               : " hidden "
           }
         >
@@ -293,7 +322,7 @@ export default function App() {
           className={
             menuActivate
               ? " hidden"
-              : " flex flex-col w-full h-[85%] overflow-hidden bg-background rounded-lg border border-border/40 box-border items-center  p-2"
+              : " flex flex-col w-full h-[82%] overflow-hidden bg-background rounded-lg border border-border/40 box-border items-center  p-2"
           }
           style={{ gap: 10 }}
         >
@@ -376,11 +405,88 @@ export default function App() {
                 </TouchableOpacity>
               </View>
             </View>
+            
 
+
+
+
+
+            {/* Stop responding */}
+            <View className=" z-10 w-full h-[2px] relative justify-center items-center">
+
+
+              <TouchableOpacity 
+                disabled = {loading ? false : true}
+                className = { loading ? "w-[190px] h-[45px] bg-background flex flex-row justify-center items-center rounded-md" : "hidden"}
+                onPress={()=>{
+                  SetLoading(false)
+                  cancelRequest()
+                  // Alert.alert(
+                  //   'Stop Responding!',
+                  //   'Your request for cancellation of generating the menu has been successfully implemented',
+                  //   [
+                  //     {
+                  //       text: 'OK',
+                  //       onPress: () => console.log('OK Pressed'),
+                  //     },
+                  //   ],
+                  //   { cancelable: false }
+                  // );
+                }}
+              >
+
+  
+              <Animated.View style={{transform: [{rotate}]}}>
+                <Svg
+                    width="17"
+                    className= "text-border text-sm animate-spin"
+                    height="20"
+                    viewBox="0 0 15 15"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <Path
+                      fill-rule="evenodd"
+                      clip-rule="evenodd"
+                      d="M12.5 2H2.5C2.22386 2 2 2.22386 2 2.5V12.5C2 12.7761 2.22386 13 2.5 13H12.5C12.7761 13 13 12.7761 13 12.5V2.5C13 2.22386 12.7761 2 12.5 2ZM2.5 1C1.67157 1 1 1.67157 1 2.5V12.5C1 13.3284 1.67157 14 2.5 14H12.5C13.3284 14 14 13.3284 14 12.5V2.5C14 1.67157 13.3284 1 12.5 1H2.5Z"
+                      fill="currentColor"
+                  />
+                  </Svg>
+                  {/* <Image style={{width: 50, height: 50}} source={require('./assets/images/book.png')} /> */}
+              </Animated.View>
+
+                <Text className=" text-border text-[15px] ml-4">Stop Responding</Text>
+              </TouchableOpacity>
+
+            </View>
+
+
+
+
+
+            {/* Erase the data on local storage */}
             <View className=" flex w-full flex-row" style={{ gap: 5 }}>
               <TouchableOpacity
                 className="w-[50px] h-12 bg-background border border-border/40 rounded-md flex items-center justify-center"
-                onPress={Erase}
+                onPress={()=>{
+                  Alert.alert(
+                    'Friendly reminder from your Spider Buddy 🕷️',
+                    "Hey there, buddy! I'm about to do a little cleanup. Mind if I erase your items?",
+                    [
+                      {
+                        text: "Hold on, let's talk about it!",
+                        style: 'cancel',
+                      },
+                      {
+                        text: 'Sure, go for it!',
+                        style: 'default',
+                        onPress: ()=>{
+                          Erase()
+                        },
+                      },
+                    ],
+                    { cancelable: false }
+                  );
+                }}
               >
                 <Svg
                   width="20"
@@ -398,10 +504,15 @@ export default function App() {
                 </Svg>
               </TouchableOpacity>
 
+              
               <TouchableOpacity
-                className="w-full h-12 flex-1 bg-primary-foreground rounded-md flex items-center justify-center"
+                disabled = {loading ? true : false}
+                className= { loading ? "bg-[#9eec98] w-full h-12 flex-1 rounded-md flex items-center justify-center pointer-events-none" : "w-full h-12 flex-1 bg-primary-foreground rounded-md flex items-center justify-center"}
                 onPress={() => {
-         
+                  
+                  SetLoading(true)
+                  console.log("loading", loading)
+
                   replyChatBeforeRES();
                   let product =[]
                   
@@ -411,43 +522,55 @@ export default function App() {
                   )
 
                 
-
+                  
                   OpenAIText({ product: `${product.join(" ")}` }).then((result ) => {
                     console.log("Menu API Response");
                     
+                      // Alerts
+                      if (result.length == 0) {
+                        SetLoading(false);
+                        Alert.alert(
+                          'Stop Responding!',
+                          'Your request for cancellation of generating the menu has been successfully implemented',
+                          [
+                            {
+                              text: 'OK',
+                              onPress: () => SetLoading(false),
+                            },
+                          ],
+                          { cancelable: false }
+                        );
+                        }else{
+                          SetLoading(false);
+                          Alert.alert(
+                            'Spider Buddy 🕷️',
+                            "Hey there, buddy! Your menus are all set to roll. Time for some delicious 🕷️🍔!",
+                            [
+                              {
+                                text: 'Got it!',
+                                onPress : () => SetLoading(false),
+                              },
+                            ],
+                            { cancelable: false }
+                          );
+                        }
 
-                    // if (result ?) {
-                      // toast({
-                      //   title: "Stop Responding!",
-                      //   description:
-                      //     "Your request for cancellation of menu has been successfully implemented",
-                      // });
-                      // SetLoading(false);
-
-                    //   messages.map((e) =>
-                    //     setMessages([
-                    //       ...messages,
-                    //       {
-                    //         products: [...e.products],
-                    //         message: `Your request for cancellation of menu has been successfully implemented!`,
-                    //         direction: "outgoing",
-                    //         role: "assistant",
-                    //         image: "",
-                    //       },
-                    //     ])
-                    //   );
-                    // } 
-                    // else {
                       // SetLoading(false);
                       setShowNotif(true)
                       setMenus(result);
-                      console.log(result,"REsi;tt API")
+                      console.log(result,"REST API")
                       // toast({
                       //   title: "DONE... ",
                       //   description: "Here are your menus",
                       // });
 
+                      
+
+
                       if (result) {
+              
+                        console.log("Inside the result")
+
                         let menus_name = [];
 
                         result.map((e, key) => {
@@ -472,18 +595,34 @@ ${menus_name.join(" \n")}`,
                             },
                           ])
                         );
+
+                        // Alert.alert(
+                        //   'Spider Buddy 🕷️',
+                        //   "Hey there, buddy! Your menus are all set to roll. Time for some delicious 🕷️🍔!",
+                        //   [
+                        //     {
+                        //       text: 'Got it!',
+                        //     },
+                        //   ],
+                        //   { cancelable: false }
+                        // );
+
+                        
+
                       }
+                    // }
                     
                   }).catch((error) => {
                     // SetLoading(false);
                     console.log(error);
                   });
+
                   
                 }}
               >
                
 
-                <Text className=" text-background">Generate Menu</Text>
+                <Text className= " text-background " >Generate Menu</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -523,3 +662,5 @@ ${menus_name.join(" \n")}`,
     </View>
   );
 }
+
+
