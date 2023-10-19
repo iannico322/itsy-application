@@ -21,10 +21,10 @@ import Preferences from "./screens/preferences/preferences";
 import EmtScreen from "./screens/components/messages/EmtScreen";
 import AIMSG from "./screens/components/messages/AIMsg";
 import UserMSG from "./screens/components/messages/userMsg";
-import SetUp,{getLocalStorage,setLocalStorage} from "./screens/tempDB";
+import SetUp,{getLocalStorage,setLocalStorage,ClearStorage} from "./screens/tempDB";
 import OpenAIText,{cancelRequest} from "./screens/API's/OpenAIText";
 import CameraITSY from "./screens/components/camera/camera";
-import OpenAIImage from "./screens/API's/OpenAIImage";
+// import OpenAIImage from "./screens/API's/OpenAIImage";
 
 // import UserMSG from "./components/messages/userMsg";
 
@@ -112,26 +112,23 @@ export default function App() {
     }
     else{
 
-      messages.map((e) =>
       setMessages([
         ...messages,
         {
-          products: [
-            ...e.products,
-            { itemsName: `${items.name}`, itemsQK: `${items.qk}` },
-          ],
+          products: messages[messages.length - 1].products.concat([{ itemName: items.name, itemQK: items.qk }]),
           message: "This is my updated Item",
           direction: "outgoing",
           role: "user",
           image: "",
         },
-      ]))
-
-      }
+      ])
       setItem({
         name: "",
         qk: "",
       })
+
+      }
+      
   }
 
 
@@ -140,25 +137,24 @@ export default function App() {
 
 
   function replyChatBeforeRES() {
-    messages.map((e) =>
-      setMessages([
-        ...messages,
-        {
-          products: [...e.products],
-          message: `🕸️Hello, dear! Like a diligent spider 🕷️, I’m spinning your menus. Your patience is as precious as dew on a web. I’m fetching your menus! 🌼
+    setMessages([
+      ...messages,
+      {
+        products: [...messages[messages.length - 1].products],
+        message: `🕸️Hello, dear! Like a diligent spider 🕷️, I’m spinning your menus. Your patience is as precious as dew on a web. I’m fetching your menus! 🌼
 
-          Please wait while I’m searching for your menus…`,
-          direction: "outgoing",
-          role: "assistant",
-          image: "",
-        },
-      ])
-    );
+        Please wait while I’m searching for your menus…`,
+        direction: "outgoing",
+        role: "assistant",
+        image: "",
+      },
+    ])
   }
 
 
-  const Erase=()=>{
-    AsyncStorage.clear()
+  const Erase= async()=>{
+    ClearStorage()
+    
     setMessages([ {
       role: "itsy",
       products: [],
@@ -172,10 +168,20 @@ export default function App() {
 
   //Handle Delete Items
   function deleteItem(indexMain, indexToDelete) {
-    messages[indexMain].products.splice(indexToDelete, 1);
+    console.log(indexMain, indexToDelete)
 
-    setMessages([...messages, messages[indexMain]]);
-    console.log(messages[indexMain], "Success Delete", indexMain);
+    // Create a new products array for the new message that excludes the removed product
+    let newProducts = messages[indexMain].products.filter((_, index) => index !== indexToDelete);
+
+    // Add a new message with the new products array
+    setMessages([...messages, {
+      products: newProducts,
+      message: "This is my updated Item",
+      direction: "outgoing",
+      role: "user",
+      image: "",
+    }]);
+    console.log("Success Delete", indexMain);
   }
   
 
@@ -243,88 +249,78 @@ export default function App() {
       //   description:
       //     "wait up negga im analyzing your image...!",
       // });
-      messages.map((e) =>
-        setMessages([
-          ...messages,
-          {
-            products: [...e.products],
-            message: `Could you please identify the food items in this image?`,
-            direction: "outgoing",
-            role: "user",
-            image: event,
-          },
-          {
-            products: [...e.products],
-            message: `🕸️Hello, dear! Im about to scan your image, please wait for a while`,
-            direction: "outgoing",
-            role: "assistant",
-            image: "",
-          },
-        ])
-      );
+      
+      setMessages([
+        ...messages,
+        {
+          products: [...messages[messages.length - 1].products],
+          message: `Could you please identify the food items in this image?`,
+          direction: "outgoing",
+          role: "user",
+          image: event,
+        },
+        {
+          products: [...messages[messages.length - 1].products],
+          message: `🕸️Hello, dear! Im about to scan your image, please wait for a while`,
+          direction: "outgoing",
+          role: "assistant",
+          image: "",
+        },
+      ])
   
       //this code here use the image recognization component then executes codes just like axios process
-       OpenAIImage({ image: event }).then((result)=>{
-          let items = []
-          let name=""
-          let qk=""
+      //  OpenAIImage({ image: event }).then((result)=>{
+      //     let items = []
+      //     let name=""
+      //     let qk=""
   
-          if (result == "No Food found!") {
-          //   toast({
-          //   title: "Done analyzing!",
-          //   description:
-          //     "No Food found!",
-          // })
-          console.log("No Food found!")
-          }else{
+      //     if (result == "No Food found!") {
+         
+      //     console.log("No Food found!")
+      //     }else{
            
-            JSON.parse(result)[0].food_indentified.map((e)=>(
-              name= e.name,
-              qk =e.quantity,
-              items = [...items,`${qk} ${e.name} `]
+      //       JSON.parse(result)[0].food_indentified.map((e)=>(
+      //         name= e.name,
+      //         qk =e.quantity,
+      //         items = [...items,`${qk} ${e.name} `]
               
-            ))
+      //       ))
           
-            
-            // toast({
-            //   title: "Done analyzing!",
-            //   description:
-            //     "I’ve taken a peek at your image and found the following adorable yummy dummy item(s)",
-            // })
-          }
+          
+      //     }
         
-          messages.map((e) =>
-          setMessages([
-            ...messages,
-            {
-              products: [...e.products],
-              message: `Identify food items on this image`,
-              direction: "outgoing",
-              role: "user",
-              image: event,
-            },
-            {
-              products: [...e.products],
-              message: result == "No Food found!"? `🕸️Hello, dear! I’m sorry, but I couldn’t find any food in the image you provided.` : `🕸️Hello, dear! I’ve taken a peek at your image and found the following adorable yummy dummy item(s):\n\n ${items.join('\n')}` ,
-              direction: "outgoing",
-              role: "assistant",
-              image: "",
-            },
-            {
-              products: [
-                ...e.products,
-                { itemsName: `${name}`, itemsQK: `${qk}` },
-              ],
-              message: "This is my updated Item",
-              direction: "outgoing",
-              role: "user",
-              image: "",
-            },
-          ])
-        )
+      //     messages.map((e) =>
+      //     setMessages([
+      //       ...messages,
+      //       {
+      //         products: [...e.products],
+      //         message: `Identify food items on this image`,
+      //         direction: "outgoing",
+      //         role: "user",
+      //         image: event,
+      //       },
+      //       {
+      //         products: [...e.products],
+      //         message: result == "No Food found!"? `🕸️Hello, dear! I’m sorry, but I couldn’t find any food in the image you provided.` : `🕸️Hello, dear! I’ve taken a peek at your image and found the following adorable yummy dummy item(s):\n\n ${items.join('\n')}` ,
+      //         direction: "outgoing",
+      //         role: "assistant",
+      //         image: "",
+      //       },
+      //       {
+      //         products: [
+      //           ...e.products,
+      //           { itemName: `${name}`, itemQK: `${qk}` },
+      //         ],
+      //         message: "This is my updated Item",
+      //         direction: "outgoing",
+      //         role: "user",
+      //         image: "",
+      //       },
+      //     ])
+      //   )
           
           
-        })
+        // })
     }
 
     
@@ -673,7 +669,7 @@ export default function App() {
               <TouchableOpacity
                 disabled = {loading ? true : false}
                 className= { loading ? "bg-[#9eec98] w-full h-12 flex-1 rounded-md flex items-center justify-center pointer-events-none" : "w-full h-12 flex-1 bg-primary-foreground rounded-md flex items-center justify-center"}
-                onPress={() => {
+                onPress={ async() => {
                   
                   SetLoading(true)
                   
@@ -683,26 +679,38 @@ export default function App() {
                   
                   messages[messages.length - 1].products.map(
                     (e) =>
-                      (product = [...product, `${e.itemsQK} ${e.itemsName}`])
+                      (product = [...product, `${e.itemQK} ${e.itemName}`])
                   )
-
-                
                   
-                  OpenAIText({ product: `${product.join(" ")}` }).then( async(result ) => {
+                  await OpenAIText({ product: `${product.join(", ")}` }).then( async (result) => {
                     console.log("Menu API Response");
+                    console.log(result)
                      
                     
                       // Alerts
                        if (result.length == 0) {
                         
                         SetLoading(false)
-                        Alert.alert(
+                       Alert.alert(
                           'Stop Responding!',
                           'Your request for cancellation of generating the menu has been successfully implemented',
                           [
                             {
                               text: 'OK',
-                              onPress: () => SetLoading(false),
+                              onPress: () => {
+
+                                setMessages([
+                                  ...messages,
+                                  {
+                                    products: [...messages[messages.length - 1].products],
+                                    message: `Your request for cancellation of menu has been successfully implemented!`,
+                                    direction: "outgoing",
+                                    role: "assistant",
+                                    image: "",
+                                  },
+                                ])
+                              }
+                              
                             },
                           ],
                           { cancelable: false }
@@ -727,22 +735,9 @@ export default function App() {
                           );
                         
                         }
-
-                      
-                      
-                      
-                      
-                      
-                      // toast({
-                      //   title: "DONE... ",
-                      //   description: "Here are your menus",
-                      // });
-
-                      
-
-
-                     
               
+                      if (result) {
+                        
                         console.log("Inside the result")
 
                         let menus_name = [];
@@ -754,11 +749,11 @@ export default function App() {
                           ];
                         });
 
-                        messages.map((e) =>
+                        
                           setMessages([
                             ...messages,
                             {
-                              products: [...e.products],
+                              products: [...messages[messages.length - 1].products],
                               message: `🕸️Hello, dear! Like a diligent spider 🕷️, your menus are spun. Thanks for your patience, as precious as dew on a web. Enjoy your menus!
         
 Here are your menus:
@@ -768,12 +763,12 @@ ${menus_name.join(" \n")}`,
                               image: "",
                             },
                           ])
-                        ); 
+                       }
 
                       
                     
                   }).catch((error) => {
-                    // SetLoading(false);
+                    SetLoading(false);
                     console.log(error);
                   });
 

@@ -34,6 +34,41 @@ const SetUpLocalStorage = async (key, values) => {
   }
 };
 
+
+const SetUpLocalStorageC = async (key, values) => {
+  try {
+    const value = await AsyncStorage.getItem(key);
+    if (value !== null) {
+      // console.log(key,"has something ")
+    } else {
+      // console.log("Empty ", key)
+      await AsyncStorage.setItem(key, values);
+    }
+  } catch (e) {
+    // console.log("Error on",key);
+  }
+};
+
+const ClearStorage = ()=>{
+
+  setLocalStorage(
+    "none",
+    "U2FsdGVkX18UQ2IN3040zHeBbni7vv1V3IxxQCKtFK8qVvVbd+1SZAApU5EQo2aptfrXD1Z4xfHRbYexqYJoIOSeBSA2gUymsQRoS6YvWcI="
+  );
+
+  setLocalStorage(
+    "messages",
+    '[{ "from": "itsy", "products": [],"message":"Hey dear, I\'m ITSY your culinary spider buddy! share your items, and I\'ll weave dishes so snappy!", "direction":"","image":"" }]'
+  );
+
+  setLocalStorage("menus", "[]");
+  setLocalStorage("SelectedPrefence", `Filipino`);
+  setLocalStorage("Languange", `English`);
+
+  console.log("erased");
+
+}
+
 const SetUp = () => {
   useEffect(() => {
     SetUpLocalStorage(
@@ -56,4 +91,4 @@ const SetUp = () => {
 
 export default SetUp;
 
-export { getLocalStorage, setLocalStorage };
+export { getLocalStorage, setLocalStorage,ClearStorage };

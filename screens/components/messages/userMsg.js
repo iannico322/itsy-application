@@ -15,8 +15,8 @@ function UserMSG({ e, onDelete, mkey }) {
             <Text className="text-white/80 text-sm italic md:not-italic mb-2">{e.message }</Text>
             <Image
             
-              className=" object-contain rounded-lg    w-[100%]"
-              style={{minHeight:130,objectFit:"contain"}}
+              className="  rounded-lg  "
+              style={{minHeight:130,objectFit:"contain",minWidth:0}}
               source={{ uri:  e.image }}
             />
           </>
@@ -47,11 +47,11 @@ function UserMSG({ e, onDelete, mkey }) {
               <View className=" w-full h-10 justify-center  flex items-center flex-row bg-background rounded-md mt-1" key={key2}>
                                 
               <View className="w-[33%]">
-                <Text className=" text-center text-[12px] text-[#808080] font-bold">{z.itemsName}</Text> 
+                <Text className=" text-center text-[12px] text-[#808080] font-bold">{z.itemName}</Text> 
               </View>
 
               <View className="w-[33%]">
-                <Text className=" text-center text-[12px] text-[#808080] font-bold">{z.itemsQK}</Text> 
+                <Text className=" text-center text-[12px] text-[#808080] font-bold">{z.itemQK}</Text> 
               </View>
 
               <View className="w-[33%] flex justify-center items-center">
