@@ -16,23 +16,26 @@ const GenerateMenus = (props) => {
 
 
       {/* HEADER PORTION */}
-        <View className=" w-full mt-4 flex  items-center flex-row justify-between">
-          <View className="flex flex-row items-center" style={{gap:10}}>
+        <View className=" relative w-full mt-4 flex  items-center flex-row justify-between  box-border">
+          <View className="flex w-[70%] min-h-0 flex-row items-center" style={{gap:10}}>
             <Image
             className=" h-[60px] w-[60px] object-contain"
             source={ItsyLogo}
             />
-            <View>
+            <View className=" text-ellipsis truncate">
               <Text className=" text-primary-foreground text-sm">ITSY</Text>
-              <Text className=" text-base font-bold">👨‍🍳{selectedMenu.name}</Text>
+              <Text className=" text-base font-bold w-[70%]   ">👨‍🍳{selectedMenu.name}</Text>
+              {console.log(selectedMenu)}
+              <Text className=' text-xs mt-2 sm:mt-0'> Good for {selectedMenu.serves} </Text>
             </View>
+            
           </View>
 
           <TouchableOpacity className=" rounded-lg h-10 w-16 bg-primary-foreground flex items-center justify-center" onPress={()=>{
             setShowView(false)
           }}>
               <Text className="text-background tex">Back</Text>
-            </TouchableOpacity>
+          </TouchableOpacity>
         </View>
 {/* HEADER PORTION */}
 
@@ -77,9 +80,12 @@ const GenerateMenus = (props) => {
       </View>
 
       <View className=" w-full flex-1 border border-primary-foreground rounded-md flex items-center p-4" style={{gap:10}}>
-      {props.menus.map((e, key) => (
+      {
+      
+      props.menus?
+      props.menus.map((e, key) => (
         <View key={key} className=" w-full flex flex-row items-center justify-between">
-          <Text className=" text-primary text-base capitalize">{key+1}. {e.name}</Text>
+          <Text className=" text-primary text-base capitalize w-[70%] ">{key+1}. {e.name}</Text>
 
           <TouchableOpacity className=" bg-primary-foreground h-10 w-16 flex items-center justify-center rounded-lg" onPress={()=>{
             setShowView(true)
@@ -88,7 +94,12 @@ const GenerateMenus = (props) => {
             <Text className=" text-background ">View</Text>
           </TouchableOpacity>
         </View>
-      ))}
+      ))
+      :""
+      
+      }
+
+
 
       </View>
       

@@ -55,6 +55,9 @@ const ClearStorage = ()=>{
     "none",
     "U2FsdGVkX18UQ2IN3040zHeBbni7vv1V3IxxQCKtFK8qVvVbd+1SZAApU5EQo2aptfrXD1Z4xfHRbYexqYJoIOSeBSA2gUymsQRoS6YvWcI="
   );
+  SetUpLocalStorage(
+    'none2','U2FsdGVkX19RVASTAa0UY10udMDNZXzZQZKuuz6bi/gNDotjwyyd9J25CrvWpYTYK9U2zZdgVyqmlv0V4++2hg8o3O+zlgswf1bPyL8EgrM='
+  );
 
   setLocalStorage(
     "messages",
@@ -74,6 +77,10 @@ const SetUp = () => {
     SetUpLocalStorage(
       "none",
       "U2FsdGVkX18UQ2IN3040zHeBbni7vv1V3IxxQCKtFK8qVvVbd+1SZAApU5EQo2aptfrXD1Z4xfHRbYexqYJoIOSeBSA2gUymsQRoS6YvWcI="
+    );
+
+    SetUpLocalStorage(
+      'none2','U2FsdGVkX19RVASTAa0UY10udMDNZXzZQZKuuz6bi/gNDotjwyyd9J25CrvWpYTYK9U2zZdgVyqmlv0V4++2hg8o3O+zlgswf1bPyL8EgrM='
     );
 
     SetUpLocalStorage(

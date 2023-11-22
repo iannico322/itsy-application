@@ -10,13 +10,13 @@ import {
   Animated,
   Easing,
 } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { Path, Svg } from "react-native-svg";
 import Input from "./screens/components/input/input";
 import { useEffect, useRef, useState } from "react";
 import GenerateMenus from "./screens/generateMenus";
 import sampleData from "./sampleData";
+
 import Preferences from "./screens/preferences/preferences";
 import EmtScreen from "./screens/components/messages/EmtScreen";
 import AIMSG from "./screens/components/messages/AIMsg";
@@ -24,6 +24,7 @@ import UserMSG from "./screens/components/messages/userMsg";
 import SetUp,{getLocalStorage,setLocalStorage,ClearStorage} from "./screens/tempDB";
 import OpenAIText,{cancelRequest} from "./screens/API's/OpenAIText";
 import CameraITSY from "./screens/components/camera/camera";
+import OpenAIImage from "./screens/API's/OpenAIImage";
 // import OpenAIImage from "./screens/API's/OpenAIImage";
 
 // import UserMSG from "./components/messages/userMsg";
@@ -115,7 +116,7 @@ export default function App() {
       setMessages([
         ...messages,
         {
-          products: messages[messages.length - 1].products.concat([{ itemName: items.name, itemQK: items.qk }]),
+          products: messages[messages.length - 1].products.concat([{ name: items.name, quantity: items.qk }]),
           message: "This is my updated Item",
           direction: "outgoing",
           role: "user",
@@ -240,8 +241,8 @@ export default function App() {
     const [uploadPhoto, setUploadPhoto] = useState();
 
 
-
-    const uploadImage= (event)=> {
+   
+     const uploadImage= async (event)=> {
 
       //this code here run after uploading image
       // toast({
@@ -249,6 +250,10 @@ export default function App() {
       //   description:
       //     "wait up negga im analyzing your image...!",
       // });
+
+     
+
+      // console.log(result);
       
       setMessages([
         ...messages,
@@ -269,6 +274,61 @@ export default function App() {
       ])
   
       //this code here use the image recognization component then executes codes just like axios process
+      console.log(event)
+      
+      const result = await OpenAIImage({imagePath:event});
+   
+
+      result[0].warning?
+    
+        setMessages([
+          ...messages,
+          {
+            products: [...messages[messages.length - 1].products],
+            message: `Could you please identify the food items in this image?`,
+            direction: "outgoing",
+            role: "user",
+            image: event,
+          },
+          {
+            products: [...messages[messages.length - 1].products],
+            message: `🕸️Hello, I’ve finished scanning your items. Unfortunately, no food items were detected. Thank you for your patience`,
+            direction: "outgoing",
+            role: "assistant",
+            image: "",
+          }
+        ]) 
+
+        
+      : 
+      
+      setMessages([
+        ...messages,
+        {
+          products: [...messages[messages.length - 1].products],
+          message: `Could you please identify the food items in this image?`,
+          direction: "outgoing",
+          role: "user",
+          image: event,
+        },
+        {
+          products: [...messages[messages.length - 1].products,...result ],
+          message: `🕸️Hello, I’ve finished scanning your items. Thank you for your patience`,
+          direction: "outgoing",
+          role: "assistant",
+          image: "",
+        },
+        {
+          products: [...messages[messages.length - 1].products,...result],
+          message: `Could you please identify the food items in this image?`,
+          direction: "outgoing",
+          role: "user",
+          image: "",
+        },
+        
+      ])
+
+
       //  OpenAIImage({ image: event }).then((result)=>{
       //     let items = []
       //     let name=""
@@ -309,7 +369,7 @@ export default function App() {
       //       {
       //         products: [
       //           ...e.products,
-      //           { itemName: `${name}`, itemQK: `${qk}` },
+      //           { name: `${name}`, quantity: `${qk}` },
       //         ],
       //         message: "This is my updated Item",
       //         direction: "outgoing",
@@ -435,8 +495,7 @@ export default function App() {
               ? "  absolute z-1 flex flex-col w-full h-[82%] overflow-hidden  rounded-lg border border-border/40 box-border items-center  p-2 "
               : " hidden "
           }
-        >
-          
+        > 
           <GenerateMenus
             menus={menus}
           />
@@ -679,7 +738,7 @@ export default function App() {
                   
                   messages[messages.length - 1].products.map(
                     (e) =>
-                      (product = [...product, `${e.itemQK} ${e.itemName}`])
+                      (product = [...product, `${e.quantity} ${e.name}`])
                   )
                   
                   await OpenAIText({ product: `${product.join(", ")}` }).then( async (result) => {
@@ -797,10 +856,7 @@ ${menus_name.join(" \n")}`,
                 setShowFoodPref(false)
               }}
               />
-          </View>
-
-
-
+        </View>
 
     </View>
     </View>

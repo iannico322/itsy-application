@@ -18,7 +18,7 @@ export default function CameraITSY({ isCameraOn, offCamera,onTakePhoto}) {
   const [permission, requestPermission] = Camera.useCameraPermissions();
   // New state variable
  // New state variable for storing the photo
- const [photoPrev,setPhotoPrev] = useState(null)
+  const [photoPrev,setPhotoPrev] = useState(null)
   const [flashMode, setFlashMode] = useState(FlashMode.off); // New state variable for flash mode
   let cameraRef = null; // Reference to the camera
 
@@ -82,7 +82,7 @@ export default function CameraITSY({ isCameraOn, offCamera,onTakePhoto}) {
 
   return (
     <View className=" flex relative flex-1  h-full w-full  ">
-      <View className=" bg-background w-full relative flex-[.1] flex flex-row items-center justify-between px-5">
+      <View className=" bg-black border-b-[1px] border-foreground w-full relative flex-[.1] flex flex-row items-center justify-between px-5">
         <TouchableOpacity className="X" onPress={offCamera}>
           <Svg
             width="25"
@@ -130,13 +130,13 @@ export default function CameraITSY({ isCameraOn, offCamera,onTakePhoto}) {
         ></Camera>
       )}
 
-      <View className=" flex-[.2] bg-background border-t-[4px] border-primary-foreground flex items-center justify-center  w-full h-20 bottom-0 ">
+      <View className=" flex-[.2] bg-black border-t-[1px] border-primary-foreground flex items-center justify-center  w-full h-20 bottom-0 ">
         <View className=" flex-1 h-full w-full flex-row">
           <TouchableOpacity style={styles.button} onPress={pickImage}>
             <View className=" bg-primary-foreground h-14 w-14 rounded-md "></View>
           </TouchableOpacity>
           <TouchableOpacity style={styles.button} onPress={takePicture}>
-            <View className=" w-20 h-20 bg-white rounded-full border-4 border-primary-foreground"></View>
+            <View className=" w-20 h-20 bg-slate-200 rounded-full border-2 border-primary-foreground"></View>
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.button} onPress={toggleCameraType}>
