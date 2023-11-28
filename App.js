@@ -25,6 +25,7 @@ import SetUp,{getLocalStorage,setLocalStorage,ClearStorage} from "./screens/temp
 import OpenAIText,{cancelRequest} from "./screens/API's/OpenAIText";
 import CameraITSY from "./screens/components/camera/camera";
 import OpenAIImage from "./screens/API's/OpenAIImage";
+import {Language}  from "./screens/components/language/language";
 // import OpenAIImage from "./screens/API's/OpenAIImage";
 
 // import UserMSG from "./components/messages/userMsg";
@@ -416,12 +417,18 @@ export default function App() {
 
 
       <StatusBar barStyle="dark-content" />
-      <View className=" flex justify-center w-full h-20  ">
-        <Image
-          className=" h-14 w-36 ml-5  "
-          style={{ resizeMode: "contain" }}
-          source={require("./assets/images/Itsy_logo_w_text.png")}
-        />
+      <View className=" flex flex-row justify-center w-full h-20  ">
+        <View className=" w-1/2 justify-center">
+          <Image
+            className=" h-14 w-36 ml-5  "
+            style={{ resizeMode: "contain" }}
+            source={require("./assets/images/Itsy_logo_w_text.png")}
+          />
+        </View >
+
+        <View className=" w-1/2 justify-center">
+          <Language />
+        </View>
       </View>
 
       <View
