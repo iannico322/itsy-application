@@ -36,11 +36,11 @@ export const Language = () => {
     );
 
     return (
-        <View className =" w-[70%] h-[45%] ">
+        <View className =" w-[60%] h-1/2 mr-3 ">
 
             <TouchableOpacity 
             onPress={()=>setSelectLanguange(!selectlanguage)}
-                className = "  flex-row justify-between items-center  px-3 rounded-md bg-background border-[1px] border-[#91919180]">
+                className = " w-full h-full flex-row justify-between items-center px-3 rounded-md bg-background border-[1px] border-[#91919180]">
 
                 <Text>{selected}</Text>
 
@@ -65,7 +65,10 @@ export const Language = () => {
 
 
             {/* Pop up for selecting language */}
-            <View className= { selectlanguage ? " h-[300px] w-[150px] mt-2 rounded-md border-[1px] border-[#91919180] shadow-md z-50 bg-background " : "hidden"}>
+            <View className= { 
+                selectlanguage 
+                ? " h-[300px] w-[150px] mt-2 rounded-md border-[1px] border-[#91919180] shadow-md bg-background z-50" 
+                : "hidden"}>
         
 
                 {/* Search */}
@@ -115,7 +118,7 @@ export const Language = () => {
                                 <View className= "w-[30px]">
                                     <Svg
                                         width="20"
-                                        className= {selected ? "text-primary text-sm" : "hidden"}
+                                        className= "text-primary text-sm"
                                         height="20"
                                         viewBox="0 0 15 15"
                                         xmlns="http://www.w3.org/2000/svg"

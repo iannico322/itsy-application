@@ -26,6 +26,7 @@ import OpenAIText,{cancelRequest} from "./screens/API's/OpenAIText";
 import CameraITSY from "./screens/components/camera/camera";
 import OpenAIImage from "./screens/API's/OpenAIImage";
 import {Language}  from "./screens/components/language/language";
+import { Theme } from "./screens/components/theme/theme";
 // import OpenAIImage from "./screens/API's/OpenAIImage";
 
 // import UserMSG from "./components/messages/userMsg";
@@ -426,8 +427,9 @@ export default function App() {
           />
         </View >
 
-        <View className=" w-1/2 justify-center">
+        <View className=" w-1/2 flex flex-row justify-center items-center">
           <Language />
+          <Theme />
         </View>
       </View>
 
