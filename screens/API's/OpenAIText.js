@@ -9,6 +9,7 @@ let cancelRequest;
 async function OpenAIText({product}) {
 
   const source = axios.CancelToken.source();
+ 
 
   
 
@@ -22,13 +23,13 @@ async function OpenAIText({product}) {
     return bytes.toString(CryptoJS.enc.Utf8);
   };
 
- 
+
 
   const bodyPrompt = `Generate at least 2 dishes in JSON format based on the following products, preferences, and language. Also, include an estimate of how many people each dish can serve. make sure to include time duration on the steps. make the steps as detailed as possible.
   Products: [${product}]
   Preferences: [${ await getLocalStorage("SelectedPrefence").then
 (e=>e)}]
-  Language [${ await getLocalStorage("Languange").then
+  Language [${ await getLocalStorage("Language").then
   (e=>e)}]
   
   Output:[{"name": "dish name1","ingredients": ["ingredient1", "ingredient2", ],"cooking_steps": ["1. step1", "2. step2", ],"serves": "number of people"},{"name": "dish name2","ingredients": ["ingredient1", "ingredient2", ],"cooking_steps": ["1. step1", "2. step2", ],"serves": "number of people"} ]`;

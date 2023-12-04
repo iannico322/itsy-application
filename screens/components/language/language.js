@@ -1,6 +1,7 @@
-import { ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native"
-import { useState } from "react";
+import { ScrollView, Text, TextInput, TouchableOpacity, View, Alert } from "react-native"
+import { useState, useEffect } from "react";
 import { Path, Svg } from "react-native-svg";
+import { setLocalStorage, getLocalStorage } from "./../../tempDB";
 
 export const Language = () => {
 
@@ -11,21 +12,15 @@ export const Language = () => {
     const [selectlanguage, setSelectLanguange] = useState(false)
 
     // Selected language
-    const [selected, setSelected] = useState("English")
+    const [selected, setSelected] = useState('English')
 
     const [languages, seLanguages] = useState ([
+        { label: 'English', value: 'English' },
         { label: 'Tagalog', value: 'Tagalog' },
+        { label: 'Bisaya', value: 'Bisaya' },
         { label: 'Spanish', value: 'Spanish' },
         { label: 'Russian', value: 'Russian' },
-        { label: 'English', value: 'English' },
-        { label: 'Japanese', value: 'Japanese' },
-        { label: 'Korean', value: 'Korean' },
-        { label: 'Chinese', value: 'Chinese' },
-        { label: 'Indian', value: 'Indian' },
-        { label: 'German', value: 'German' },
-        { label: 'Italian', value: 'Italian' },
-        { label: 'French', value: 'French' },
-        { label: 'UwU', value: 'UwU' },
+        { label: 'UwU', value: 'UwU' }, 
       ])
 
     // Filter search options
@@ -34,6 +29,15 @@ export const Language = () => {
         option.label.toLowerCase().includes(search.toLowerCase()) ||
         option.value.toLowerCase().includes(search.toLowerCase())
     );
+
+    useEffect(() => {
+        setLocalStorage("Language",selected)
+        console.log("Selected language is: ", selected)
+      }, [selected]);
+
+   
+
+  
 
     return (
         <View className =" w-[60%] h-1/2 mr-3 ">
@@ -67,7 +71,7 @@ export const Language = () => {
             {/* Pop up for selecting language */}
             <View className= { 
                 selectlanguage 
-                ? " h-[300px] w-[150px] mt-2 rounded-md border-[1px] border-[#91919180] shadow-md bg-background z-50" 
+                ? " h-[270px] w-[150px] mt-2 rounded-md border-[1px] border-[#91919180] shadow-md bg-background z-50" 
                 : "hidden"}>
         
 
@@ -111,6 +115,15 @@ export const Language = () => {
                                 setSelectLanguange(false)
                                 setSelected(e.value)
                                 setSearch('')
+
+                                Alert.alert(
+                                    'Language Swap!',
+                                    `Woohoo! Were now chatting in ${selected}`,
+                                    [
+                                      { text: 'OK' },
+                                    ],
+                                    { cancelable: false }
+                                  );
                             }}
                         >
 
