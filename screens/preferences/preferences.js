@@ -33,14 +33,6 @@ const Preferences = ({ Close }) => {
       prefState:false,
       prefName: "Low-Carb",
     },
-    {
-      prefState:false,
-      prefName: "Vegetarian",
-    },
-    {
-      prefState:false,
-      prefName: "Low-Carb",
-    },
   ]);
 
 

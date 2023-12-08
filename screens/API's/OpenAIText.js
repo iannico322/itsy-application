@@ -37,6 +37,7 @@ async function OpenAIText({product}) {
   const apiMessages = { role: "user", content: bodyPrompt };
 
   const apiRequestBody = {
+    // model: "gpt-4",
     model: "gpt-3.5-turbo",
     messages: [
       {
@@ -143,8 +144,12 @@ async function OpenAIText({product}) {
      try  {
     const  response =  axios.post("https://api.openai.com/v1/chat/completions", apiRequestBody, {
       cancelToken: source.token,
+      // headers: {
+      //   Authorization: `Bearer ${ getLocalStorage("none")}`,
+      //   "Content-Type": "application/json",
+      // }
       headers: {
-        Authorization: `Bearer ${ await getLocalStorage("none").then(e=>(decryptText(e)))}`,
+        Authorization: `Bearer ${ await getLocalStorage("none2").then(e=>(decryptText(e)))}`,
         "Content-Type": "application/json",
       }
     });
