@@ -409,12 +409,12 @@ export default function App() {
       <View className={ viewAccount ? " overflow-hidden flex w-screen h-screen absolute z-50 bg-black/70  items-center justify-center " : "hidden"}
       >
        
-       <SinSupFo 
+       <SinSupFo
        
-        viewOpt={
-          ()=>{
-          SetviewAccount(false)
-          }}
+        show = {viewAccount}
+       
+        viewOpt= {() => SetviewAccount(false)}
+
         />
 
      </View>
