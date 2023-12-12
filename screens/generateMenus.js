@@ -25,7 +25,7 @@ const GenerateMenus = (props) => {
             <View className=" text-ellipsis truncate">
               <Text className=" text-primary-foreground text-sm">ITSY</Text>
               <Text className=" text-base font-bold w-[70%]   ">👨‍🍳{selectedMenu.name}</Text>
-              {console.log(selectedMenu)}
+           
               <Text className=' text-xs mt-2 sm:mt-0'> Good for {selectedMenu.serves} </Text>
             </View>
             
