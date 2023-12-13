@@ -60,6 +60,29 @@ const ClearStorage = ()=>{
 
 }
 
+const ClearStorage2 = ()=>{
+
+  setLocalStorage(
+    "none",
+    "U2FsdGVkX18UQ2IN3040zHeBbni7vv1V3IxxQCKtFK8qVvVbd+1SZAApU5EQo2aptfrXD1Z4xfHRbYexqYJoIOSeBSA2gUymsQRoS6YvWcI="
+  );
+  SetUpLocalStorage(
+    'none2','U2FsdGVkX19RVASTAa0UY10udMDNZXzZQZKuuz6bi/gNDotjwyyd9J25CrvWpYTYK9U2zZdgVyqmlv0V4++2hg8o3O+zlgswf1bPyL8EgrM='
+  );
+
+  setLocalStorage(
+    "messages2",
+    '[{ "from": "itsy", "products": [],"message":"Hey dear, I\'m ITSY Plus your culinary spider buddy! share your items, and I\'ll weave dishes so snappy!", "direction":"","image":"" }]'
+  );
+
+  setLocalStorage("menus", "[]");
+  setLocalStorage("SelectedPrefence", `Filipino`);
+  setLocalStorage("Languange", `English`);
+
+  console.log("erased");
+
+}
+
 
 const LogOut = ()=>{
 
@@ -76,7 +99,7 @@ const SetUp = () => {
       SetUpLocalStorage('user','0');
       SetUpLocalStorage('key','0');
       SetUpLocalStorage('callCount','0');
-      SetUpLocalStorage('messages2','[{ "from": "itsy", "products": [],"message":"Hey dear, I\'m ITSY your culinary spider buddy! share your items, and I\'ll weave dishes so snappy!", "direction":"","image":"" }]');
+      SetUpLocalStorage('messages2','[{ "from": "itsy", "products": [],"message":"Hey dear, I\'m ITSY Plus your culinary spider buddy! share your items, and I\'ll weave dishes so snappy!", "direction":"","image":"" }]');
 
 
 
@@ -104,4 +127,4 @@ const SetUp = () => {
 
 export default SetUp;
 
-export { getLocalStorage, setLocalStorage,ClearStorage,LogOut };
+export { getLocalStorage, setLocalStorage,ClearStorage,LogOut,ClearStorage2 };

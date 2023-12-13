@@ -22,14 +22,15 @@ import Preferences from "./preferences/preferences";
 import EmtScreen from "./components/messages/EmtScreen";
 import AIMSG from "./components/messages/AIMsg";
 import UserMSG from "./components/messages/userMsg";
-import SetUp,{getLocalStorage,setLocalStorage,ClearStorage} from "./tempDB";
+import {getLocalStorage,setLocalStorage,ClearStorage,LogOut, ClearStorage2} from "./tempDB";
 import OpenAIText,{cancelRequest} from "./API's/OpenAIText";
 import CameraITSY from "./components/camera/camera";
 import OpenAIImage from "./API's/OpenAIImage";
 import {Language}  from "./components/language/language";
 
 import { SinSupFo, userAccount } from "./authentication/SinSupFo";
-import { Menu, Divider, Provider,Button } from 'react-native-paper';
+import Nav from "./components/nav/nav";
+import axios from './../plugins/axios';
 
 
 export default function ItsyPlus({ navigation }) {
@@ -42,32 +43,111 @@ export default function ItsyPlus({ navigation }) {
 
 
   const [viewAccount, SetviewAccount] = useState(false)
-  const [visible, setVisible] = React.useState(false);
+  const [user, setUser] = React.useState(0);
+  const [key, setKey] = React.useState(0);
+  
 
-  const openMenu = () => setVisible(true);
 
-  const closeMenu = () => setVisible(false);
+  async function GetMessageStart() {
+
+    await axios.get(`message/user/${user?user.id:""}`,
+     {
+     headers: {
+       Authorization: `Token ${key}`,
+     }, 
+   }).then( async (res)=>{
+     if (res.data.length ==0) {
+        await axios.post(`message/all/`,
+             {
+
+               "userID": user? user.id:"",
+               "messageContent": JSON.stringify(messages)
+             }
+           ,{
+             headers: {
+               Authorization: `Token ${key}`,
+             }, 
+           }).then((ress)=>{
+             setMessages(
+               JSON.parse(getLocalStorage("messages2") || "")
+             );
+           }).catch((error) => {
+            console.log(error);
+          });
+     }else{
+        await axios.get(`message/user/${user? user.id:""}`
+           ,{
+             headers: {
+               Authorization: `Token ${key}`,
+             }, 
+           }).then((ress)=>{      
+             // console.log(ress.data[0].messageContent)
+             setMessages( JSON.parse(ress.data[0].messageContent))
+           }).catch((error) => {
+            console.log(error);
+          });
+     }
+
+   }).catch((error) => {
+    console.log(error);
+  });
+   
+ }  
+
+
+
+ async function PostMessage(message) {
+
+   axios.post(`message/all/`,
+     {
+       "userID": user? user.id:"",
+       "messageContent": JSON.stringify(message)
+     }
+
+   ,{
+     headers: {
+       Authorization: `Token ${key}`,
+     }, 
+   }).then((res)=>{
+     console.log(res.data)
+   })
+   
+ }
+
 
 
   useEffect(() => {
 
     
-      getLocalStorage("messages").then(value => {
+      getLocalStorage("messages2").then(value => {
         setMessages(JSON.parse(value))
+      });
+
+      getLocalStorage("user").then(value => {
+        
+        setUser(JSON.parse(value))
+      });
+
+      getLocalStorage("key").then(value => {
+        
+        setKey(JSON.parse(value))
       });
 
       getLocalStorage("menus").then(value => {
         setMenus(JSON.parse(value))
       });
 
+      if (getLocalStorage("key") === "0" || getLocalStorage("user") === "0") {
+        navigation.navigate("Itsy");
+    }
+    GetMessageStart();
+      console.log("running")
   }, []);
 
 
   const scrollViewRef = useRef();
  
   const [loading,SetLoading]= useState(false)  
-
-
   const [showFoodPref, setShowFoodPref] = useState(false)
  
 
@@ -120,6 +200,16 @@ export default function ItsyPlus({ navigation }) {
           image: "",
         },
       ])
+      PostMessage([
+        ...messages,
+        {
+          products: messages[messages.length - 1].products.concat([{ name: items.name, quantity: items.qk }]),
+          message: "This is my updated Item",
+          direction: "outgoing",
+          role: "user",
+          image: "",
+        },
+      ])
       setItem({
         name: "",
         qk: "",
@@ -151,7 +241,7 @@ export default function ItsyPlus({ navigation }) {
 
 
   const Erase= async()=>{
-    ClearStorage()
+    ClearStorage2 ()
     
     setMessages([ {
       role: "itsy",
@@ -161,6 +251,17 @@ export default function ItsyPlus({ navigation }) {
       direction: "",
       image: "",
     }])
+
+    PostMessage([ {
+      role: "itsy",
+      products: [],
+      message:
+        "Hey dear, I'm ITSY your culinary spider buddy! share your items, and I'll weave dishes so snappy!",
+      direction: "",
+      image: "",
+    }])
+
+
   }
 
 
@@ -179,6 +280,13 @@ export default function ItsyPlus({ navigation }) {
       role: "user",
       image: "",
     }]);
+    PostMessage([...messages, {
+      products: newProducts,
+      message: "This is my updated Item",
+      direction: "outgoing",
+      role: "user",
+      image: "",
+    }])
     console.log("Success Delete", indexMain);
   }
   
@@ -195,7 +303,7 @@ export default function ItsyPlus({ navigation }) {
   useEffect(() => {
     scrollToBottom();
     scrollViewRef.current?.scrollToEnd({ animated: true });
-    setLocalStorage("messages",JSON.stringify(messages))
+    setLocalStorage("messages2",JSON.stringify(messages))
   }, [messages]);
 
   
@@ -269,15 +377,31 @@ export default function ItsyPlus({ navigation }) {
           image: "",
         },
       ])
+
+      PostMessage([
+        ...messages,
+        {
+          products: [...messages[messages.length - 1].products],
+          message: `Could you please identify the food items in this image?`,
+          direction: "outgoing",
+          role: "user",
+          image: event,
+        },
+        {
+          products: [...messages[messages.length - 1].products],
+          message: `🕸️Hello, dear! Im about to scan your image, please wait for a while`,
+          direction: "outgoing",
+          role: "assistant",
+          image: "",
+        },
+      ])
   
       //this code here use the image recognization component then executes codes just like axios process
-      console.log(event)
+      // console.log(event)
       
       const result = await OpenAIImage({imagePath:event});
    
-
-      result[0].warning?
-    
+      if (result[0].warning) {
         setMessages([
           ...messages,
           {
@@ -296,43 +420,84 @@ export default function ItsyPlus({ navigation }) {
           }
         ]) 
 
+        PostMessage([
+          ...messages,
+          {
+            products: [...messages[messages.length - 1].products],
+            message: `Could you please identify the food items in this image?`,
+            direction: "outgoing",
+            role: "user",
+            image: event,
+          },
+          {
+            products: [...messages[messages.length - 1].products],
+            message: `🕸️Hello, I’ve finished scanning your items. Unfortunately, no food items were detected. Thank you for your patience`,
+            direction: "outgoing",
+            role: "assistant",
+            image: "",
+          }
+        ]) 
         
-      : 
-      
-      setMessages([
-        ...messages,
-        {
-          products: [...messages[messages.length - 1].products],
-          message: `Could you please identify the food items in this image?`,
-          direction: "outgoing",
-          role: "user",
-          image: event,
-        },
-        {
-          products: [...messages[messages.length - 1].products,...result ],
-          message: `🕸️Hello, I’ve finished scanning your items. Thank you for your patience`,
-          direction: "outgoing",
-          role: "assistant",
-          image: "",
-        },
-        {
-          products: [...messages[messages.length - 1].products,...result],
-          message: `Could you please identify the food items in this image?`,
-          direction: "outgoing",
-          role: "user",
-          image: "",
-        },
-        
-      ])
+      }else{
+        setMessages([
+          ...messages,
+          {
+            products: [...messages[messages.length - 1].products],
+            message: `Could you please identify the food items in this image?`,
+            direction: "outgoing",
+            role: "user",
+            image: event,
+          },
+          {
+            products: [...messages[messages.length - 1].products,...result ],
+            message: `🕸️Hello, I’ve finished scanning your items. Thank you for your patience`,
+            direction: "outgoing",
+            role: "assistant",
+            image: "",
+          },
+          {
+            products: [...messages[messages.length - 1].products,...result],
+            message: `Could you please identify the food items in this image?`,
+            direction: "outgoing",
+            role: "user",
+            image: "",
+          },
+          
+        ])
+        PostMessage([
+          ...messages,
+          {
+            products: [...messages[messages.length - 1].products],
+            message: `Could you please identify the food items in this image?`,
+            direction: "outgoing",
+            role: "user",
+            image: event,
+          },
+          {
+            products: [...messages[messages.length - 1].products,...result ],
+            message: `🕸️Hello, I’ve finished scanning your items. Thank you for your patience`,
+            direction: "outgoing",
+            role: "assistant",
+            image: "",
+          },
+          {
+            products: [...messages[messages.length - 1].products,...result],
+            message: `Could you please identify the food items in this image?`,
+            direction: "outgoing",
+            role: "user",
+            image: "",
+          },
+          
+        ])
 
-
+      }
       
     }
 
     
 
   return (
-    <View className=" flex-1 h-full w-full relative">
+    <View className=" flex-1 h-full w-full relative bg-white">
     <View className={showCamera?" z-50 flex-1 h-full w-full absolute":" hidden"}>
 
       <CameraITSY isCameraOn={showCamera} offCamera={()=>{
@@ -340,7 +505,7 @@ export default function ItsyPlus({ navigation }) {
       }}
 
       onTakePhoto={ async(newPhoto) =>  {
-        console.log(newPhoto,"new")
+        // console.log(newPhoto,"new")
           setUploadPhoto(newPhoto);
          uploadImage(newPhoto)
         setShowCamera(false)
@@ -394,46 +559,10 @@ export default function ItsyPlus({ navigation }) {
 
         </View >
          
-        <View className="relative flex flex-col">
-
+         <Nav
+          navigation={navigation}
+         />
         
-        <TouchableOpacity
-          className= " relative min-w-[0px] flex h-10 px-2 flex-row justify-between items-center bg-white border-[1px] border-[#9191911c] rounded-md"
-          onPress={openMenu}
-        >
-        <Text className="text-black" >Ian Nico</Text>
-        
-        
-        <Svg
-            width="17"
-            className=" text-primary text-sm"
-            height="15"
-            viewBox="0 0 15 15"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <Path
-              fill-rule="evenodd"
-              clip-rule="evenodd"
-              d="M3.13523 6.15803C3.3241 5.95657 3.64052 5.94637 3.84197 6.13523L7.5 9.56464L11.158 6.13523C11.3595 5.94637 11.6759 5.95657 11.8648 6.15803C12.0536 6.35949 12.0434 6.67591 11.842 6.86477L7.84197 10.6148C7.64964 10.7951 7.35036 10.7951 7.15803 10.6148L3.15803 6.86477C2.95657 6.67591 2.94637 6.35949 3.13523 6.15803Z"
-              fill="currentColor"
-            />
-          </Svg>
-        
-        </TouchableOpacity>
-
-        <View className=" absolute mt-12 rounded-md h-[160px] top-0 w-[160px] bg-white border-[1px] border-border/20 flex flex-col p-2">
-          <TouchableOpacity className="h-[50%] p-2 flex flex-col justify-end bg-slate-600/20 rounded-md"
-          onPress={()=>{
-            console.log("click")
-
-          }}
-          >
-            <Text className=" text-base">Ian Nico Caulin</Text>
-            <Text className=" text-[8px] italic text-black/40">iannicocaulin@gmail.com</Text>
-          </TouchableOpacity>
-
-        </View>
-        </View>
 
           <View className=" w-[25%] relative flex items-center  z-50 mr-5  ">
               <Language />
@@ -767,8 +896,8 @@ export default function ItsyPlus({ navigation }) {
                   )
                   
                   await OpenAIText({ product: `${product.join(", ")}` }).then( async (result) => {
-                    console.log("Menu API Response");
-                    console.log(result)
+                    // console.log("Menu API Response");
+                    // console.log(result)
                      
                     
                       // Alerts
@@ -793,6 +922,17 @@ export default function ItsyPlus({ navigation }) {
                                     image: "",
                                   },
                                 ])
+                                PostMessage([
+                                  ...messages,
+                                  {
+                                    products: [...messages[messages.length - 1].products],
+                                    message: `Your request for cancellation of menu has been successfully implemented!`,
+                                    direction: "outgoing",
+                                    role: "assistant",
+                                    image: "",
+                                  },
+                                ])
+                                
                               }
                               
                             },
@@ -838,10 +978,23 @@ export default function ItsyPlus({ navigation }) {
                             ...messages,
                             {
                               products: [...messages[messages.length - 1].products],
-                              message: `🕸️Hello, dear! Like a diligent spider 🕷️, your menus are spun. Thanks for your patience, as precious as dew on a web. Enjoy your menus!
+                              message: `Hello, dear! Like a diligent spider , your menus are spun. Thanks for your patience, as precious as dew on a web. Enjoy your menus!
         
-Here are your menus:
-${menus_name.join(" \n")}`,
+                              Here are your menus:
+                              ${menus_name.join(" \n")}`,
+                              direction: "outgoing",
+                              role: "assistant",
+                              image: "",
+                            },
+                          ])
+
+                          PostMessage([
+                            ...messages,
+                            {
+                              products: [...messages[messages.length - 1].products],
+                              message: `Hello, dear! Like a diligent spider , your menus are spun. Thanks for your patience, as precious as dew on a web. Enjoy your menus!
+                              Here are your menus:
+                              ${menus_name.join(" \n")}`,
                               direction: "outgoing",
                               role: "assistant",
                               image: "",

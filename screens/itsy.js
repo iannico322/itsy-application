@@ -63,7 +63,7 @@ import {
           setCallCount(parseInt(storedCount || '0'));
         }
         if (await getLocalStorage("key").then(e=>(e))!="0"||await getLocalStorage("user").then(e=>(e))!="0") {
-          navigate("Plus");
+          navigation.navigate("Plus");
         }
         getLocalStorage("messages").then(value => {
           setMessages(JSON.parse(value));
