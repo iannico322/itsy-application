@@ -8,8 +8,9 @@ import {
   ScrollView,
   Alert,
   Animated,
-  Easing,
+  Easing
 } from "react-native";
+import React from "react";
 
 import { Path, Svg } from "react-native-svg";
 import Input from "./components/input/input";
@@ -28,14 +29,11 @@ import OpenAIImage from "./API's/OpenAIImage";
 import {Language}  from "./components/language/language";
 
 import { SinSupFo, userAccount } from "./authentication/SinSupFo";
-
+import { Menu, Divider, Provider,Button } from 'react-native-paper';
 
 
 export default function ItsyPlus({ navigation }) {
 
-
- 
-  SetUp()
 
   const [menuActivate, setMenuActivate] = useState(false);
    
@@ -44,6 +42,11 @@ export default function ItsyPlus({ navigation }) {
 
 
   const [viewAccount, SetviewAccount] = useState(false)
+  const [visible, setVisible] = React.useState(false);
+
+  const openMenu = () => setVisible(true);
+
+  const closeMenu = () => setVisible(false);
 
 
   useEffect(() => {
@@ -363,12 +366,19 @@ export default function ItsyPlus({ navigation }) {
      </View>
 
 
-      <StatusBar barStyle="dark-content" />
+     
 
-      <View className=" flex flex-row justify-center w-full h-20 items-center  ">
-        <View className=" relative w-1/2 flex flex-row  items-start">
+      <View className=" flex flex-row justify-between w-full  h-10 mt-5 items-center  z-50 ">
+     
+
+      
+        
+
+      
+         
+        <View className=" ml-3 h-10 relative  flex flex-row  items-start">
           <Image
-            className=" h-10 w-28 ml-5  "
+            className=" h-10 w-28   "
             style={{ resizeMode: "contain" }}
             source={require("../assets/images/Itsy_logo_w_text.png")}
           />
@@ -376,27 +386,62 @@ export default function ItsyPlus({ navigation }) {
 <View className=" right-0 h-4 rounded-lg w-8  bg-[#3dd44b] flex items-center justify-center">
             <Text className="  text-[8px] text-white">Plus</Text>
           </View>
+         
+      
 
           {/* account icon */}
          
 
         </View >
+         
+        <View className="relative flex flex-col">
 
-        <View className=" relative w-1/2 flex flex-row items-center" style={{gap:0}}>
-          <TouchableOpacity
-            className= " min-w-[0px] h-8 px-2 flex justify-center items-center bg-green-500 border-[1px] border-[#9191911c] rounded-md"
-            onPress={()=>{
-              navigation.navigate("Itsy")
-            }}
+        
+        <TouchableOpacity
+          className= " relative min-w-[0px] flex h-10 px-2 flex-row justify-between items-center bg-white border-[1px] border-[#9191911c] rounded-md"
+          onPress={openMenu}
+        >
+        <Text className="text-black" >Ian Nico</Text>
+        
+        
+        <Svg
+            width="17"
+            className=" text-primary text-sm"
+            height="15"
+            viewBox="0 0 15 15"
+            xmlns="http://www.w3.org/2000/svg"
           >
-          <Text className="text-white" >Ian Nico</Text>
-          
+            <Path
+              fill-rule="evenodd"
+              clip-rule="evenodd"
+              d="M3.13523 6.15803C3.3241 5.95657 3.64052 5.94637 3.84197 6.13523L7.5 9.56464L11.158 6.13523C11.3595 5.94637 11.6759 5.95657 11.8648 6.15803C12.0536 6.35949 12.0434 6.67591 11.842 6.86477L7.84197 10.6148C7.64964 10.7951 7.35036 10.7951 7.15803 10.6148L3.15803 6.86477C2.95657 6.67591 2.94637 6.35949 3.13523 6.15803Z"
+              fill="currentColor"
+            />
+          </Svg>
+        
+        </TouchableOpacity>
+
+        <View className=" absolute mt-12 rounded-md h-[160px] top-0 w-[160px] bg-white border-[1px] border-border/20 flex flex-col p-2">
+          <TouchableOpacity className="h-[50%] p-2 flex flex-col justify-end bg-slate-600/20 rounded-md"
+          onPress={()=>{
+            console.log("click")
+
+          }}
+          >
+            <Text className=" text-base">Ian Nico Caulin</Text>
+            <Text className=" text-[8px] italic text-black/40">iannicocaulin@gmail.com</Text>
           </TouchableOpacity>
-          <View className=" relative flex items-center translate-x-[-20px] z-30  ">
+
+        </View>
+        </View>
+
+          <View className=" w-[25%] relative flex items-center  z-50 mr-5  ">
               <Language />
           </View>
           
-        </View>
+          
+          
+       
         
       </View>
 

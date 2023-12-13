@@ -45,19 +45,53 @@ import {
   
     const [viewAccount, SetviewAccount] = useState(false)
   
-  
+   
+
+    const [callCount, setCallCount] = useState(0);
     useEffect(() => {
-  
-      
+      async function fetchData() {
+        const currentDate = new Date().toDateString();
+        const storedDate = await getLocalStorage("date").then(e=>(e));
+        const storedCount = await getLocalStorage("callCount").then(e=>(e));
+        
+        // setLocalStorage("callCount","0")
+        if (storedDate === null || storedDate !== currentDate) {
+          setLocalStorage("date",JSON.stringify(currentDate));
+          
+          setCallCount(0);
+        } else {
+          setCallCount(parseInt(storedCount || '0'));
+        }
+        if (await getLocalStorage("key").then(e=>(e))!="0"||await getLocalStorage("user").then(e=>(e))!="0") {
+          navigate("Plus");
+        }
         getLocalStorage("messages").then(value => {
-          setMessages(JSON.parse(value))
+          setMessages(JSON.parse(value));
         });
-  
+
+        getLocalStorage("callCount").then(value => {
+          setCallCount(JSON.parse(value))
+        });
+    
         getLocalStorage("menus").then(value => {
-          setMenus(JSON.parse(value))
+          setMenus(JSON.parse(value));
         });
-  
+      }
+    
+      fetchData();
     }, []);
+
+  const limitedCallFunction = (num) => {
+    if (callCount < 10) {
+      // Your function logic goes here
+
+      const newCount = callCount + num;
+      setLocalStorage("callCount",newCount.toString())
+      setCallCount(newCount);
+    } else {
+      console.log('No more function available.');
+    }
+  };
   
   
     const scrollViewRef = useRef();
@@ -106,11 +140,13 @@ import {
         );
       }
       else{
+        const lastMessage = messages[messages.length - 1];
+    const products = lastMessage && lastMessage.products ? lastMessage.products : [];
   
         setMessages([
           ...messages,
           {
-            products: messages[messages.length - 1].products.concat([{ name: items.name, quantity: items.qk }]),
+            products: products.concat([{ name: items.name, quantity: items.qk }]),
             message: "This is my updated Item",
             direction: "outgoing",
             role: "user",
@@ -132,10 +168,13 @@ import {
   
   
     function replyChatBeforeRES() {
+
+      const lastMessage = messages[messages.length - 1];
+  const products = lastMessage && lastMessage.products ? lastMessage.products : [];
       setMessages([
         ...messages,
         {
-          products: [...messages[messages.length - 1].products],
+          products: [...products],
           message: `🕸️Hello, dear! Like a diligent spider 🕷️, I’m spinning your menus. Your patience is as precious as dew on a web. I’m fetching your menus! 🌼
   
           Please wait while I’m searching for your menus…`,
@@ -238,43 +277,24 @@ import {
      
        const uploadImage= async (event)=> {
   
-        //this code here run after uploading image
-        // toast({
-        //   title: "Analyzing Image...",
-        //   description:
-        //     "wait up negga im analyzing your image...!",
-        // });
-  
        
-  
-        // console.log(result);
-        
-        setMessages([
-          ...messages,
-          {
-            products: [...messages[messages.length - 1].products],
-            message: `Could you please identify the food items in this image?`,
-            direction: "outgoing",
-            role: "user",
-            image: event,
-          },
-          {
-            products: [...messages[messages.length - 1].products],
-            message: `🕸️Hello, dear! Im about to scan your image, please wait for a while`,
-            direction: "outgoing",
-            role: "assistant",
-            image: "",
-          },
-        ])
-    
-        //this code here use the image recognization component then executes codes just like axios process
-        console.log(event)
-        
-        const result = await OpenAIImage({imagePath:event});
-     
-  
-        result[0].warning?
-      
+        if (callCount > 9) {
+
+          Alert.alert(
+            "ITSY whoopsyyy!",
+            "You have reach your usage limit today, please comeback tommorow or register an account for unlimited usage.",
+            [
+              {
+                text: 'Got it!',
+                onPress : () => {
+                  console.log("working")
+                },
+              },
+            ],
+            { cancelable: false }
+          );
+          
+        }else{
           setMessages([
             ...messages,
             {
@@ -286,41 +306,66 @@ import {
             },
             {
               products: [...messages[messages.length - 1].products],
-              message: `🕸️Hello, I’ve finished scanning your items. Unfortunately, no food items were detected. Thank you for your patience`,
+              message: `🕸️Hello, dear! Im about to scan your image, please wait for a while`,
               direction: "outgoing",
               role: "assistant",
               image: "",
-            }
-          ]) 
-  
+            },
+          ])
+          //this code here use the image recognization component then executes codes just like axios process
+          console.log(event)
           
-        : 
+          const result = await OpenAIImage({imagePath:event});
+          result[0].warning?
+            setMessages([
+              ...messages,
+              {
+                products: [...messages[messages.length - 1].products],
+                message: `Could you please identify the food items in this image?`,
+                direction: "outgoing",
+                role: "user",
+                image: event,
+              },
+              {
+                products: [...messages[messages.length - 1].products],
+                message: `🕸️Hello, I’ve finished scanning your items. Unfortunately, no food items were detected. Thank you for your patience`,
+                direction: "outgoing",
+                role: "assistant",
+                image: "",
+              }
+            ]) 
+          : 
+          setMessages([
+            ...messages,
+            {
+              products: [...messages[messages.length - 1].products],
+              message: `Could you please identify the food items in this image?`,
+              direction: "outgoing",
+              role: "user",
+              image: event,
+            },
+            {
+              products: [...messages[messages.length - 1].products,...result ],
+              message: `🕸️Hello, I’ve finished scanning your items. Thank you for your patience`,
+              direction: "outgoing",
+              role: "assistant",
+              image: "",
+            },
+            {
+              products: [...messages[messages.length - 1].products,...result],
+              message: `Could you please identify the food items in this image?`,
+              direction: "outgoing",
+              role: "user",
+              image: "",
+            },
+            
+          ])
+
+          limitedCallFunction(1)
+
+        }
         
-        setMessages([
-          ...messages,
-          {
-            products: [...messages[messages.length - 1].products],
-            message: `Could you please identify the food items in this image?`,
-            direction: "outgoing",
-            role: "user",
-            image: event,
-          },
-          {
-            products: [...messages[messages.length - 1].products,...result ],
-            message: `🕸️Hello, I’ve finished scanning your items. Thank you for your patience`,
-            direction: "outgoing",
-            role: "assistant",
-            image: "",
-          },
-          {
-            products: [...messages[messages.length - 1].products,...result],
-            message: `Could you please identify the food items in this image?`,
-            direction: "outgoing",
-            role: "user",
-            image: "",
-          },
-          
-        ])
+       
   
   
         
@@ -329,7 +374,7 @@ import {
       
   
     return (
-      <View className=" flex-1 h-full w-full relative">
+      <View className=" flex-1 h-full w-full relative bg-white">
       <View className={showCamera?" z-50 flex-1 h-full w-full absolute":" hidden"}>
   
         <CameraITSY isCameraOn={showCamera} offCamera={()=>{
@@ -366,7 +411,7 @@ import {
   
         <StatusBar barStyle="dark-content" />
   
-        <View className=" flex flex-row justify-center w-full h-20  ">
+        <View className=" flex  flex-row justify-between w-full h-20  ">
           <TouchableOpacity className=" w-1/2 flex flex-row justify-between items-center" onPress={()=>{
               navigation.navigate("Plus")
             }}>
@@ -382,9 +427,9 @@ import {
   
           </TouchableOpacity >
   
-          <View className=" w-1/2 flex flex-row justify-end items-center" style={{gap:10}}>
+          <View className=" w-[40%] flex flex-row justify-end items-center" style={{gap:10}}>
             <TouchableOpacity
-              className= " w-[20%] h-1/2 justify-center items-center bg-background border-[1px] border-[#91919180] rounded-md"
+              className= " w-10 h-1/2 justify-center items-center bg-background border-[1px] border-[#91919180] rounded-md"
               onPress={()=>SetviewAccount(true)}
             >
               <Svg
@@ -501,7 +546,7 @@ import {
               
              <View className=" z-20 pointer-events-none flex gap-3 left-0 absolute top-0 p-2 pt-0 ">
                 
-                <Text className="  text-accent-foreground ">Usage: <Text className=" text-green-500 text-2xl">{"2"}</Text>/10</Text>
+                <Text className="  text-accent-foreground ">Usage: <Text className=" text-green-500 text-2xl">{callCount}</Text>/10</Text>
               </View>
               <View className=" absolute  bottom-0 right-0 mb-5 mr-2 w-14 h-12  bg-background/60 rounded-md flex items-center flex-row  justify-center z-40" pointerEvents="auto">
   
@@ -721,7 +766,26 @@ import {
                   className= { loading ? "bg-[#9eec98] w-full h-12 flex-1 rounded-md flex items-center justify-center pointer-events-none" : "w-full h-12 flex-1 bg-primary-foreground rounded-md flex items-center justify-center"}
                   onPress={ async() => {
                     
-                    SetLoading(true)
+
+                    limitedCallFunction(0)
+
+                    if (callCount > 9) {
+                      Alert.alert(
+                      "ITSY whoopsyyy!",
+                      "You have reach your usage limit today, please comeback tommorow or register an account for unlimited usage.",
+                        [
+                          {
+                            text: 'Got it!',
+                            onPress : () => {
+                              console.log("working")
+                            },
+                          },
+                        ],
+                        { cancelable: false }
+                      );
+                      
+                    }else{
+                      SetLoading(true)
                     
   
                     replyChatBeforeRES();
@@ -813,6 +877,7 @@ import {
                                 image: "",
                               },
                             ])
+                            limitedCallFunction(1)
                          }
   
                         
@@ -821,6 +886,9 @@ import {
                       SetLoading(false);
                       console.log(error);
                     });
+
+                    }
+                    
   
                     
                   }}

@@ -33,6 +33,14 @@ export const Language = () => {
     useEffect(() => {
         setLocalStorage("Language",selected)
         console.log("Selected language is: ", selected)
+        Alert.alert(
+            'Language Swap!',
+            `Woohoo! Were now chatting in ${selected}`,
+            [
+              { text: 'OK' },
+            ],
+            { cancelable: false }
+          );
       }, [selected]);
 
    
@@ -40,7 +48,7 @@ export const Language = () => {
   
 
     return (
-        <View className =" w-[60%] h-1/2 mr-3 ">
+        <View className =" relative w-full h-10 mr-3  ">
 
             <TouchableOpacity 
             onPress={()=>setSelectLanguange(!selectlanguage)}
@@ -116,14 +124,7 @@ export const Language = () => {
                                 setSelected(e.value)
                                 setSearch('')
 
-                                Alert.alert(
-                                    'Language Swap!',
-                                    `Woohoo! Were now chatting in ${selected}`,
-                                    [
-                                      { text: 'OK' },
-                                    ],
-                                    { cancelable: false }
-                                  );
+                               
                             }}
                         >
 

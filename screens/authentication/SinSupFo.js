@@ -7,6 +7,8 @@ import { Path, Svg } from "react-native-svg";
 import axios from "./../../plugins/axios";
 import AlertWarning from "../components/alert/alert";
 
+import SetUp,{getLocalStorage,setLocalStorage,ClearStorage} from "./../tempDB";
+
 export const SinSupFo = ({viewOpt, show, navigation}) => {
 
     const [sinsupfo,setSinSupFo] = useState(0)
@@ -76,6 +78,7 @@ export const SinSupFo = ({viewOpt, show, navigation}) => {
           
               try {
                await axios.post("token/login/",user).then((res)=>{
+                   setLocalStorage("key",JSON.stringify(res.data.auth_token))
                   // localStorage.setItem("key",res.data.auth_token)
                   setWarning({
                     load:true,
@@ -90,6 +93,7 @@ export const SinSupFo = ({viewOpt, show, navigation}) => {
                     }, 
                   }).then((res)=>{
                     console.log(res.data)
+                    setLocalStorage("user",JSON.stringify(res.data))
                   //   localStorage.setItem("user",JSON.stringify(res.data))
                     setWarning({
                       load:true,
