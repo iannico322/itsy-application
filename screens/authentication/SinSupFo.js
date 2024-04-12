@@ -626,7 +626,7 @@ export const SinSupFo = ({viewOpt, show, navigation}) => {
 
             <Animated.View 
                 style={[animatedStyle2]}
-                className = { sinsupfo == 1 ? " flex w-[95%] min-h-[630px] pb-5 bg-[#EDEDED] rounded-md px-6 pt-4" : "hidden"} >
+                className = { sinsupfo == 1 ? " flex w-[100%] min-h-[630px] pb-5 bg-[#EDEDED] rounded-md px-6 pt-4" : "hidden"} >
                
                 {/* Exit */}
                 <View className = " h-[50px] w-full items-end ">
@@ -888,7 +888,7 @@ export const SinSupFo = ({viewOpt, show, navigation}) => {
 
                 {/* Send reset link button */}
                 <TouchableOpacity
-                className=" w-full h-[40px] bg-[#F5F5F5] rounded-md flex flex-row justify-center items-center "
+                className=" w-full h-[40px] bg-[#F5F5F5] rounded-md flex flex-row justify-center items-center mb-2"
                 style={warning.load?{pointerEvents:"none",gap:5}:{pointerEvents:"auto",gap:5}}
                 onPress={ForgotPassword}
                 >
